@@ -10,6 +10,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -24,8 +25,7 @@ public class GenerateCommand implements Runnable {
 
     @Option(
             names = {"-c", "--config"},
-            description = "Path to codegen.yaml in the target project",
-            required = true
+            description = "Path to codegen.yaml (defaults to codegen.yaml in the same directory as the jar)"
     )
     private Path config;
 
@@ -37,7 +37,7 @@ public class GenerateCommand implements Runnable {
 
     @Option(
             names = {"-o", "--output"},
-            description = "Project root to write generated files (defaults to config file directory)"
+            description = "Project root to write generated files (defaults to config 'output' field, or parent of config file's parent directory)"
     )
     private Path output;
 
@@ -62,18 +62,12 @@ public class GenerateCommand implements Runnable {
 
     @Override
     public void run() {
-        if (!write && !dryRun) {
-            throw new CommandLine.ParameterException(
-                    new CommandLine(this),
-                    "Specify --dry-run to preview or --write to generate files."
-            );
+        if (config == null) {
+            config = resolveDefaultConfig();
         }
 
         ProjectConfig projectConfig = ConfigLoader.load(config);
-        Path projectRoot = output != null ? output : config.toAbsolutePath().getParent();
-        if (projectRoot == null) {
-            throw new IllegalStateException("Unable to resolve project root from config path: " + config);
-        }
+        Path projectRoot = resolveProjectRoot(projectConfig);
 
         Path ddlPath = resolveDdlPath(projectConfig);
         List<TableDefinition> tables = DdlParser.parseFile(ddlPath);
@@ -81,8 +75,30 @@ public class GenerateCommand implements Runnable {
             throw new IllegalArgumentException("No CREATE TABLE statement found in DDL: " + ddlPath);
         }
 
-        CodeGenerator generator = new CodeGenerator(projectConfig, projectRoot, dryRun, write);
+        boolean shouldWrite = !dryRun;
+        CodeGenerator generator = new CodeGenerator(projectConfig, projectRoot, dryRun, shouldWrite);
         generator.generateAll(tables);
+    }
+
+    /**
+     * 解析项目根目录（代码输出基准目录）。
+     * 优先级：--output 命令行参数 > 配置文件 output 字段（相对于配置文件目录解析）。
+     *
+     * @param projectConfig 项目配置
+     * @return 项目根目录绝对路径
+     */
+    private Path resolveProjectRoot(ProjectConfig projectConfig) {
+        if (output != null) {
+            return output.toAbsolutePath();
+        }
+        Path configDir = config.toAbsolutePath().getParent();
+        if (projectConfig.getOutput() != null && !projectConfig.getOutput().isEmpty()) {
+            return configDir.resolve(projectConfig.getOutput()).normalize();
+        }
+        throw new CommandLine.ParameterException(
+                new CommandLine(this),
+                "Output directory not specified. Use --output option or set 'output' in codegen.yaml."
+        );
     }
 
     /**

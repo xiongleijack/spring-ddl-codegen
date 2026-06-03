@@ -1,0 +1,29 @@
+project:
+  basePackage: com.example.order
+  author: xionglei
+  database: bond_basic
+
+ddl: sql/schema.sql
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  - serviceImpl
+  - controller
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
+
+options:
+  enableImport: false
+  enableExport: false
+  businessKey: auto
+  overwrite: true
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

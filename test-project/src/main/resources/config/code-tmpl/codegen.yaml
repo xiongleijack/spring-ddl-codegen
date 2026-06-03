@@ -1,0 +1,27 @@
+project:
+  basePackage: com.example.order
+  author: xionglei
+  database: bond_basic
+
+ddl: schema.sql
+output: ../../../../..
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  - serviceImpl
+  - controller
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
+
+options:
+  businessKey: auto
+  overwrite: true
+
+stack:
+  lombok: false
+  swagger: true

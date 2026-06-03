@@ -22,6 +22,8 @@ public class ProjectConfig {
     );
     /** DDL文件路径（相对于配置文件所在目录） */
     private String ddl;
+    /** 代码输出目录（相对于配置文件所在目录，不配则默认为配置文件上两级目录） */
+    private String output;
 
     public ProjectSection getProject() {
         return project;
@@ -61,6 +63,14 @@ public class ProjectConfig {
 
     public void setDdl(String ddl) {
         this.ddl = ddl;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
     }
 
     /**

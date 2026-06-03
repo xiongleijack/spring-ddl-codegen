@@ -2,27 +2,27 @@ package com.example.order.service;
 
 import com.github.wz2cool.dynamic.SortDirection;
 import com.github.wz2cool.dynamic.model.NormPagingResult;
-import com.example.order.model.dto.OrderDetailDTO;
-import com.example.order.model.dto.request.OrderQueryDTO;
-import com.example.order.model.dto.response.OrderPageDTO;
-import com.example.order.model.entity.bondbasic.OrderDO;
+import com.example.order.model.dto.OnshoreBondFilterV3DetailDTO;
+import com.example.order.model.dto.request.OnshoreBondFilterV3QueryDTO;
+import com.example.order.model.dto.response.OnshoreBondFilterV3PageDTO;
+import com.example.order.model.entity.bondbasic.OnshoreBondFilterV3DO;
 
 import java.util.Collection;
 
 /**
- * 订单表表Service层 {@link OrderDO}
+ * 表Service层 {@link OnshoreBondFilterV3DO}
  *
  * @author xionglei
  */
-public interface OrderService {
+public interface OnshoreBondFilterV3Service {
 
     /**
      * 新增数据处理
      *
      * @param userId              用户id
-     * @param orderDetailDTO 用户请求对象
+     * @param onshoreBondFilterV3DetailDTO 用户请求对象
      */
-    void insertOrder(Long userId, OrderDetailDTO orderDetailDTO);
+    void insertOnshoreBondFilterV3(Long userId, OnshoreBondFilterV3DetailDTO onshoreBondFilterV3DetailDTO);
 
     /**
      * 更新deleted字段
@@ -37,9 +37,9 @@ public interface OrderService {
      * 更新数据
      *
      * @param userId              用户id
-     * @param orderDetailDTO 请求对象
+     * @param onshoreBondFilterV3DetailDTO 请求对象
      */
-    void updateOrder(Long userId, OrderDetailDTO orderDetailDTO);
+    void updateOnshoreBondFilterV3(Long userId, OnshoreBondFilterV3DetailDTO onshoreBondFilterV3DetailDTO);
 
     /**
      * 根据主键获取数据
@@ -47,19 +47,19 @@ public interface OrderService {
      * @param id 主键
      * @return 数据
      */
-    OrderDetailDTO getOrderById(Long id);
+    OnshoreBondFilterV3DetailDTO getOnshoreBondFilterV3ById(Long id);
 
     /**
      * 分页查询
      *
-     * @param orderQueryDTO 查询条件
+     * @param onshoreBondFilterV3QueryDTO 查询条件
      * @param pageSize             每页大小
      * @param pageNum              当前页
      * @param sortProperty         排序字段
      * @param sortDirection        排序方向
      * @return 分页结果
      */
-    NormPagingResult<OrderPageDTO> pageQuery(
-            OrderQueryDTO orderQueryDTO, Integer pageSize,
+    NormPagingResult<OnshoreBondFilterV3PageDTO> pageQuery(
+            OnshoreBondFilterV3QueryDTO onshoreBondFilterV3QueryDTO, Integer pageSize,
             Integer pageNum, String sortProperty, SortDirection sortDirection);
 }
