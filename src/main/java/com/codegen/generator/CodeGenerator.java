@@ -79,8 +79,8 @@ public class CodeGenerator {
         if (enabledTemplates.contains("serviceImpl")) {
             files.add(new GeneratedFile(config.getResolvedPath("serviceImpl"), table.getClassName() + "ServiceImpl.java", "serviceImpl.ftl", model));
         }
-        if (enabledTemplates.contains("controller")) {
-            files.add(new GeneratedFile(config.getResolvedPath("controller"), "Mgt" + table.getClassName() + "Controller.java", "controller.ftl", model));
+        if (enabledTemplates.contains("mgtController")) {
+            files.add(new GeneratedFile(config.getResolvedPath("controller"), "Mgt" + table.getClassName() + "Controller.java", "mgtController.ftl", model));
         }
         if (enabledTemplates.contains("detailDto")) {
             files.add(new GeneratedFile(config.getResolvedPath("dto"), table.getClassName() + "DetailDTO.java", "detailDto.ftl", model));
@@ -94,22 +94,8 @@ public class CodeGenerator {
         if (enabledTemplates.contains("queryBo")) {
             files.add(new GeneratedFile(config.getResolvedPath("bo"), table.getClassName() + "QueryBO.java", "queryBo.ftl", model));
         }
-
-        if (config.getOptions().isEnableImport()) {
-            files.add(new GeneratedFile(
-                    config.getResolvedPath("controller"),
-                    table.getClassName() + "ImportController.java",
-                    "importController.ftl",
-                    model
-            ));
-        }
-        if (config.getOptions().isEnableExport()) {
-            files.add(new GeneratedFile(
-                    config.getResolvedPath("controller"),
-                    table.getClassName() + "ExportController.java",
-                    "exportController.ftl",
-                    model
-            ));
+        if (enabledTemplates.contains("canalDto")) {
+            files.add(new GeneratedFile(config.getResolvedPath("dto") + "/canal", table.getClassName() + "CanalDTO.java", "canalDto.ftl", model));
         }
 
         for (GeneratedFile file : files) {
@@ -133,8 +119,6 @@ public class CodeGenerator {
         model.put("pk", table.getPrimaryKey());
         model.put("businessKey", table.getBusinessKey());
         model.put("hasBusinessKey", table.getBusinessKey() != null);
-        model.put("enableImport", config.getOptions().isEnableImport());
-        model.put("enableExport", config.getOptions().isEnableExport());
         model.put("databasePackage", config.getDatabasePackage());
         model.put("util", new TemplateUtils());
         model.put("importTypes", collectImportTypes(table));

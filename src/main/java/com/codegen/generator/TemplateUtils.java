@@ -69,6 +69,32 @@ public class TemplateUtils {
     }
 
     /**
+     * 将驼峰命名转为下划线命名（用于Canal JSON字段映射）
+     * 例如: "orderNo" -> "order_no", "createTime" -> "create_time"
+     *
+     * @param camelCase 驼峰命名字符串
+     * @return 下划线命名字符串
+     */
+    public String humpToUnderline(String camelCase) {
+        if (camelCase == null || camelCase.isEmpty()) {
+            return camelCase;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < camelCase.length(); i++) {
+            char c = camelCase.charAt(i);
+            if (Character.isUpperCase(c)) {
+                if (i > 0) {
+                    sb.append('_');
+                }
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
      * 判断字段是否为审计字段（创建人/时间、更新人/时间、逻辑删除）。
      * 审计字段在生成DTO和BO时会被自动排除。
      *

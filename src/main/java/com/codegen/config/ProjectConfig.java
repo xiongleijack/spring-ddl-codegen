@@ -161,30 +161,10 @@ public class ProjectConfig {
      * 代码生成选项配置
      */
     public static class OptionsSection {
-        /** 是否生成数据导入Controller */
-        private boolean enableImport = false;
-        /** 是否生成数据导出Controller */
-        private boolean enableExport = false;
         /** 业务主键策略: "auto"自动识别唯一索引, 或指定列名 */
         private String businessKey = "auto";
         /** 文件已存在时是否覆盖 */
         private boolean overwrite = false;
-
-        public boolean isEnableImport() {
-            return enableImport;
-        }
-
-        public void setEnableImport(boolean enableImport) {
-            this.enableImport = enableImport;
-        }
-
-        public boolean isEnableExport() {
-            return enableExport;
-        }
-
-        public void setEnableExport(boolean enableExport) {
-            this.enableExport = enableExport;
-        }
 
         public String getBusinessKey() {
             return businessKey;
