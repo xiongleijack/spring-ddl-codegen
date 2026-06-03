@@ -1,11 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn compile *)",
-      "Bash(javac -version)",
-      "Bash(javac -cp \"src/main/java\" -d /tmp/out src/main/java/com/codegen/ddl/DdlParser.java src/main/java/com/codegen/model/ColumnDefinition.java src/main/java/com/codegen/model/IndexDefinition.java src/main/java/com/codegen/model/TableDefinition.java src/main/java/com/codegen/generator/NamingUtils.java src/main/java/com/codegen/generator/TypeMapper.java src/main/java/com/codegen/generator/BusinessKeyResolver.java)",
-      "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(*)"
     ]
   }
 }
