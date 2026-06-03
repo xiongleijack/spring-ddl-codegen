@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * 订单表表Detail对象 {@link OrderDO}
  *
- * @author codegen
+ * @author xionglei
  */
 public class OrderDetailDTO {
 

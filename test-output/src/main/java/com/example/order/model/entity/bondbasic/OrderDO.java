@@ -1,4 +1,4 @@
-package com.example.order.model.entity;
+package com.example.order.model.entity.bondbasic;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * 订单表表实体对象
  *
- * @author codegen
+ * @author xionglei
  */
 @Table(name="t_order")
 public class OrderDO {

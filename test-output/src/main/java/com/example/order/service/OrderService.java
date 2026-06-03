@@ -5,14 +5,14 @@ import com.github.wz2cool.dynamic.model.NormPagingResult;
 import com.example.order.model.dto.OrderDetailDTO;
 import com.example.order.model.dto.request.OrderQueryDTO;
 import com.example.order.model.dto.response.OrderPageDTO;
-import com.example.order.model.entity.OrderDO;
+import com.example.order.model.entity.bondbasic.OrderDO;
 
 import java.util.Collection;
 
 /**
  * 订单表表Service层 {@link OrderDO}
  *
- * @author codegen
+ * @author xionglei
  */
 public interface OrderService {
 

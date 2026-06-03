@@ -1,16 +1,21 @@
 project:
   basePackage: com.example.order
   author: xionglei
+  database: bond_basic
 
-paths:
-  entity: src/main/java/com/example/order/model/entity
-  mapper: src/main/java/com/example/order/mapper
-  dao: src/main/java/com/example/order/dao
-  service: src/main/java/com/example/order/service
-  serviceImpl: src/main/java/com/example/order/service/impl
-  controller: src/main/java/com/example/order/controller/management
-  dto: src/main/java/com/example/order/model/dto
-  bo: src/main/java/com/example/order/model/bo
+ddl: ddl/order.sql
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  - serviceImpl
+  - controller
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
 
 options:
   enableImport: false

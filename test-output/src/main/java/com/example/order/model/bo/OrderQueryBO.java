@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 /**
  * 订单表表查询业务对象
  *
- * @author codegen
+ * @author xionglei
  */
 public class OrderQueryBO {
 

@@ -20,8 +20,8 @@ import ${basePackage}.model.bo.${table.className}QueryBO;
 import ${basePackage}.model.dto.${table.className}DetailDTO;
 import ${basePackage}.model.dto.request.${table.className}QueryDTO;
 import ${basePackage}.model.dto.response.${table.className}PageDTO;
-import ${basePackage}.model.entity.${table.className}DO;
-import ${basePackage}.dao.${table.className}DAO;
+import ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePackage}</#if>.${table.className}DO;
+import ${basePackage}.dao<#if databasePackage?has_content>.${databasePackage}</#if>.${table.className}DAO;
 
 /**
  * ${table.comment!table.className}表Service实现层 {@link ${table.className}DO}

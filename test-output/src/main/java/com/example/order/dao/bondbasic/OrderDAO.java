@@ -1,4 +1,4 @@
-package com.example.order.dao;
+package com.example.order.dao.bondbasic;
 
 import com.github.wz2cool.dynamic.*;
 import com.github.wz2cool.dynamic.model.NormPagingResult;
@@ -7,8 +7,8 @@ import com.github.wz2cool.dynamic.UpdateQuery;
 import com.github.wz2cool.dynamic.mybatis.mapper.batch.MapperBatchAction;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Repository;
-import com.example.order.mapper.OrderMapper;
-import com.example.order.model.entity.OrderDO;
+import com.example.order.mapper.bondbasic.OrderMapper;
+import com.example.order.model.entity.bondbasic.OrderDO;
 import com.example.order.model.bo.OrderQueryBO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * 订单表表数据库访问层 {@link OrderDO}
  * 对OrderMapper层做出简单封装 {@link OrderMapper}
  *
- * @author codegen
+ * @author xionglei
  */
 @Repository
 public class OrderDAO {

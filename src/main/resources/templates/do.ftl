@@ -1,5 +1,5 @@
 <#-- DO实体类模板 - 对齐 tmpl.json 风格，使用JPA注解 -->
-package ${basePackage}.model.entity;
+package ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePackage}</#if>;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

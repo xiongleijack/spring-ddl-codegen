@@ -17,7 +17,7 @@ import java.util.Collection;
 /**
  * management 订单表后台管理
  *
- * @author codegen
+ * @author xionglei
  */
 @Api(tags = "(后台管理)订单表")
 @RestController

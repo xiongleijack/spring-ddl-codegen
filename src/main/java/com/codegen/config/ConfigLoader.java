@@ -31,13 +31,6 @@ public final class ConfigLoader {
         if (isBlank(config.getProject().getBasePackage())) {
             throw new IllegalArgumentException("project.basePackage is required in " + configPath);
         }
-        if (isBlank(config.getPaths().getEntity())
-                || isBlank(config.getPaths().getMapper())
-                || isBlank(config.getPaths().getService())
-                || isBlank(config.getPaths().getServiceImpl())
-                || isBlank(config.getPaths().getController())) {
-            throw new IllegalArgumentException("All paths.* entries are required in " + configPath);
-        }
     }
 
     private static boolean isBlank(String value) {

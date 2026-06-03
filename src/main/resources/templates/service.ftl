@@ -6,7 +6,7 @@ import com.github.wz2cool.dynamic.model.NormPagingResult;
 import ${basePackage}.model.dto.${table.className}DetailDTO;
 import ${basePackage}.model.dto.request.${table.className}QueryDTO;
 import ${basePackage}.model.dto.response.${table.className}PageDTO;
-import ${basePackage}.model.entity.${table.className}DO;
+import ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePackage}</#if>.${table.className}DO;
 
 import java.util.Collection;
 

@@ -1,5 +1,5 @@
 <#-- DAO数据访问层模板 - 对齐 tmpl.json 风格 -->
-package ${basePackage}.dao;
+package ${basePackage}.dao<#if databasePackage?has_content>.${databasePackage}</#if>;
 
 import com.github.wz2cool.dynamic.*;
 import com.github.wz2cool.dynamic.model.NormPagingResult;
@@ -8,8 +8,8 @@ import com.github.wz2cool.dynamic.UpdateQuery;
 import com.github.wz2cool.dynamic.mybatis.mapper.batch.MapperBatchAction;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Repository;
-import ${basePackage}.mapper.${table.className}Mapper;
-import ${basePackage}.model.entity.${table.className}DO;
+import ${basePackage}.mapper<#if databasePackage?has_content>.${databasePackage}</#if>.${table.className}Mapper;
+import ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePackage}</#if>.${table.className}DO;
 import ${basePackage}.model.bo.${table.className}QueryBO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.session.SqlSessionFactory;

@@ -1,19 +1,27 @@
 package com.codegen.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 项目配置类，对应 codegen.yaml 配置文件的完整结构。
  * 包含项目基本信息、输出路径、生成选项和技术栈配置四个部分。
  */
 public class ProjectConfig {
 
-    /** 项目基本信息（包名、作者） */
+    /** 项目基本信息（包名、作者、数据库名） */
     private ProjectSection project = new ProjectSection();
-    /** 各层代码的输出路径配置 */
-    private PathsSection paths = new PathsSection();
     /** 代码生成选项（导入导出、业务主键、覆盖策略） */
     private OptionsSection options = new OptionsSection();
     /** 技术栈配置（ORM框架、Lombok、Swagger） */
     private StackSection stack = new StackSection();
+    /** 要生成的模板列表，不配置则全部生成 */
+    private List<String> templates = Arrays.asList(
+            "do", "mapper", "dao", "service", "serviceImpl",
+            "controller", "detailDto", "queryDto", "pageDto", "queryBo"
+    );
+    /** DDL文件路径（相对于配置文件所在目录） */
+    private String ddl;
 
     public ProjectSection getProject() {
         return project;
@@ -21,14 +29,6 @@ public class ProjectConfig {
 
     public void setProject(ProjectSection project) {
         this.project = project;
-    }
-
-    public PathsSection getPaths() {
-        return paths;
-    }
-
-    public void setPaths(PathsSection paths) {
-        this.paths = paths;
     }
 
     public OptionsSection getOptions() {
@@ -47,6 +47,22 @@ public class ProjectConfig {
         this.stack = stack;
     }
 
+    public List<String> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(List<String> templates) {
+        this.templates = templates;
+    }
+
+    public String getDdl() {
+        return ddl;
+    }
+
+    public void setDdl(String ddl) {
+        this.ddl = ddl;
+    }
+
     /**
      * 项目基本信息配置
      */
@@ -55,6 +71,8 @@ public class ProjectConfig {
         private String basePackage = "com.example.demo";
         /** 代码作者，用于 @author 注解 */
         private String author = "codegen";
+        /** 数据库名称，entity/mapper/dao 层会加上对应子包（去下划线全小写） */
+        private String database;
 
         public String getBasePackage() {
             return basePackage;
@@ -71,93 +89,52 @@ public class ProjectConfig {
         public void setAuthor(String author) {
             this.author = author;
         }
+
+        public String getDatabase() {
+            return database;
+        }
+
+        public void setDatabase(String database) {
+            this.database = database;
+        }
     }
 
     /**
-     * 各层代码文件的输出路径配置。
-     * 每个路径为相对于项目根目录的相对路径。
+     * 根据 basePackage 和 database 自动推导各层代码输出路径。
+     *
+     * @param layer 层名称: entity/mapper/dao/service/serviceImpl/controller/dto/bo
+     * @return 相对于项目根目录的输出路径
      */
-    public static class PathsSection {
-        /** 实体类(DO)输出路径 */
-        private String entity = "src/main/java/com/example/demo/model/entity";
-        /** Mapper接口输出路径 */
-        private String mapper = "src/main/java/com/example/demo/mapper";
-        /** DAO数据访问层输出路径 */
-        private String dao = "src/main/java/com/example/demo/dao";
-        /** Service接口输出路径 */
-        private String service = "src/main/java/com/example/demo/service";
-        /** Service实现类输出路径 */
-        private String serviceImpl = "src/main/java/com/example/demo/service/impl";
-        /** Controller控制器输出路径 */
-        private String controller = "src/main/java/com/example/demo/controller/management";
-        /** DTO数据传输对象输出路径 */
-        private String dto = "src/main/java/com/example/demo/model/dto";
-        /** BO业务对象输出路径 */
-        private String bo = "src/main/java/com/example/demo/model/bo";
-
-        public String getEntity() {
-            return entity;
+    public String getResolvedPath(String layer) {
+        String basePath = "src/main/java/" + project.getBasePackage().replace('.', '/');
+        String dbSuffix = getDatabaseSuffix();
+        switch (layer) {
+            case "entity":      return basePath + "/model/entity" + dbSuffix;
+            case "mapper":      return basePath + "/mapper" + dbSuffix;
+            case "dao":         return basePath + "/dao" + dbSuffix;
+            case "service":     return basePath + "/service";
+            case "serviceImpl": return basePath + "/service/impl";
+            case "controller":  return basePath + "/controller/management";
+            case "dto":         return basePath + "/model/dto";
+            case "bo":          return basePath + "/model/bo";
+            default: throw new IllegalArgumentException("Unknown layer: " + layer);
         }
+    }
 
-        public void setEntity(String entity) {
-            this.entity = entity;
+    /**
+     * 获取数据库名对应的包名后缀（去下划线、全小写）。
+     * 若未配置 database 则返回空串。
+     */
+    public String getDatabasePackage() {
+        if (project.getDatabase() == null || project.getDatabase().isEmpty()) {
+            return "";
         }
+        return project.getDatabase().replace("_", "").toLowerCase();
+    }
 
-        public String getMapper() {
-            return mapper;
-        }
-
-        public void setMapper(String mapper) {
-            this.mapper = mapper;
-        }
-
-        public String getService() {
-            return service;
-        }
-
-        public void setService(String service) {
-            this.service = service;
-        }
-
-        public String getServiceImpl() {
-            return serviceImpl;
-        }
-
-        public void setServiceImpl(String serviceImpl) {
-            this.serviceImpl = serviceImpl;
-        }
-
-        public String getController() {
-            return controller;
-        }
-
-        public void setController(String controller) {
-            this.controller = controller;
-        }
-
-        public String getDao() {
-            return dao;
-        }
-
-        public void setDao(String dao) {
-            this.dao = dao;
-        }
-
-        public String getDto() {
-            return dto;
-        }
-
-        public void setDto(String dto) {
-            this.dto = dto;
-        }
-
-        public String getBo() {
-            return bo;
-        }
-
-        public void setBo(String bo) {
-            this.bo = bo;
-        }
+    private String getDatabaseSuffix() {
+        String dbPkg = getDatabasePackage();
+        return dbPkg.isEmpty() ? "" : "/" + dbPkg;
     }
 
     /**

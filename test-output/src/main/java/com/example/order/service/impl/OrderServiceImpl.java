@@ -19,13 +19,13 @@ import com.example.order.model.bo.OrderQueryBO;
 import com.example.order.model.dto.OrderDetailDTO;
 import com.example.order.model.dto.request.OrderQueryDTO;
 import com.example.order.model.dto.response.OrderPageDTO;
-import com.example.order.model.entity.OrderDO;
-import com.example.order.dao.OrderDAO;
+import com.example.order.model.entity.bondbasic.OrderDO;
+import com.example.order.dao.bondbasic.OrderDAO;
 
 /**
  * 订单表表Service实现层 {@link OrderDO}
  *
- * @author codegen
+ * @author xionglei
  */
 @Service
 public class OrderServiceImpl implements OrderService {
