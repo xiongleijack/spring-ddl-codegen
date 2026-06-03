@@ -79,21 +79,21 @@ public class ProjectConfig {
      */
     public static class PathsSection {
         /** 实体类(DO)输出路径 */
-        private String entity = "src/main/java/com/example/demo/domain/entity";
+        private String entity = "src/main/java/com/example/demo/model/entity";
         /** Mapper接口输出路径 */
-        private String mapper = "src/main/java/com/example/demo/infrastructure/mapper";
+        private String mapper = "src/main/java/com/example/demo/mapper";
         /** DAO数据访问层输出路径 */
-        private String dao = "src/main/java/com/example/demo/infrastructure/dao";
+        private String dao = "src/main/java/com/example/demo/dao";
         /** Service接口输出路径 */
-        private String service = "src/main/java/com/example/demo/application/service";
+        private String service = "src/main/java/com/example/demo/service";
         /** Service实现类输出路径 */
-        private String serviceImpl = "src/main/java/com/example/demo/application/service/impl";
+        private String serviceImpl = "src/main/java/com/example/demo/service/impl";
         /** Controller控制器输出路径 */
-        private String controller = "src/main/java/com/example/demo/api/controller";
+        private String controller = "src/main/java/com/example/demo/controller/management";
         /** DTO数据传输对象输出路径 */
-        private String dto = "src/main/java/com/example/demo/api/dto";
+        private String dto = "src/main/java/com/example/demo/model/dto";
         /** BO业务对象输出路径 */
-        private String bo = "src/main/java/com/example/demo/domain/bo";
+        private String bo = "src/main/java/com/example/demo/model/bo";
 
         public String getEntity() {
             return entity;

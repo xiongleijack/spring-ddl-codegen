@@ -1,26 +1,28 @@
-<#-- ============================================================
-     DAO数据访问层模板
-     生成 {ClassName}DAO.java，封装Mapper的基础操作。
-     提供: 按主键查询、按业务主键查询(可选)、分页查询、
-           条件列表查询、新增、更新、删除、批量新增。
-     内部通过 buildWrapper() 构建动态查询条件。
-     ============================================================ -->
-package ${basePackage}.infrastructure.dao;
+<#-- DAO数据访问层模板 - 对齐 tmpl.json 风格 -->
+package ${basePackage}.dao;
 
-import ${basePackage}.domain.entity.${table.className}DO;
-import ${basePackage}.domain.bo.${table.className}QueryBO;
-import ${basePackage}.infrastructure.mapper.${table.className}Mapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.wz2cool.dynamic.*;
+import com.github.wz2cool.dynamic.model.NormPagingResult;
+import com.github.wz2cool.dynamic.DynamicQuery;
+import com.github.wz2cool.dynamic.UpdateQuery;
+import com.github.wz2cool.dynamic.mybatis.mapper.batch.MapperBatchAction;
+import com.google.common.collect.Lists;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
-
+import ${basePackage}.mapper.${table.className}Mapper;
+import ${basePackage}.model.entity.${table.className}DO;
+import ${basePackage}.model.bo.${table.className}QueryBO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Optional;
+import static com.github.wz2cool.dynamic.builder.DynamicQueryBuilderHelper.isEqual;
+import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * ${table.comment!table.className}表数据库访问层
+ * ${table.comment!table.className}表数据库访问层 {@link ${table.className}DO}
+ * 对${table.className}Mapper层做出简单封装 {@link ${table.className}Mapper}
  *
  * @author ${author}
  */
@@ -30,91 +32,152 @@ public class ${table.className}DAO {
     @Resource
     private ${table.className}Mapper ${table.variableName}Mapper;
 
-    /**
-     * 根据主键查询
-     */
-    public Optional<${table.className}DO> getById(${util.simpleType(pk.javaType)} id) {
-        return Optional.ofNullable(${table.variableName}Mapper.selectById(id));
-    }
-<#if hasBusinessKey>
+    @Resource
+    private SqlSessionFactory sqlSessionFactory;
 
     /**
-     * 根据业务主键查询
+     * 幂等保存${table.comment!table.className} ${table.variableName}DOs
+     *
+     * @param userId       {@code Long} 用户id
+     * @param ${table.variableName}DOs {@link ${table.className}DO}
      */
-    public ${table.className}DO getBy${util.firstUpper(businessKey.javaName)}(${util.simpleType(businessKey.javaType)} ${businessKey.javaName}) {
-        return ${table.variableName}Mapper.selectBy${util.firstUpper(businessKey.javaName)}(${businessKey.javaName});
-    }
-</#if>
-
-    /**
-     * 分页查询，根据QueryBO中的非空字段构建查询条件
-     */
-    public Page<${table.className}DO> pageQuery(Page<${table.className}DO> page, ${table.className}QueryBO queryBO) {
-        LambdaQueryWrapper<${table.className}DO> wrapper = buildWrapper(queryBO);
-        return ${table.variableName}Mapper.selectPage(page, wrapper);
-    }
-
-    /**
-     * 条件列表查询（不分页）
-     */
-    public List<${table.className}DO> listByCondition(${table.className}QueryBO queryBO) {
-        return ${table.variableName}Mapper.selectList(buildWrapper(queryBO));
-    }
-
-    /**
-     * 新增单条记录
-     */
-    public int insert(${table.className}DO entity) {
-        return ${table.variableName}Mapper.insert(entity);
-    }
-
-    /**
-     * 根据主键更新
-     */
-    public int updateById(${table.className}DO entity) {
-        return ${table.variableName}Mapper.updateById(entity);
-    }
-
-    /**
-     * 根据主键删除
-     */
-    public int deleteById(${util.simpleType(pk.javaType)} id) {
-        return ${table.variableName}Mapper.deleteById(id);
-    }
-
-    /**
-     * 批量新增（逐条插入）
-     */
-    public int insertBatch(List<${table.className}DO> entities) {
-        int count = 0;
-        for (${table.className}DO entity : entities) {
-            count += ${table.variableName}Mapper.insert(entity);
+    @Transactional(rollbackFor = Exception.class)
+    public void saveBatch${table.className}DOs(Long userId, final Collection<${table.className}DO> ${table.variableName}DOs) {
+        if (CollectionUtils.isEmpty(${table.variableName}DOs)) {
+            return;
         }
-        return count;
+        Map<String, Long> businessKeyToIdMap = getBusinessKeyToIdMap(${table.variableName}DOs);
+        List<${table.className}DO> insertList = Lists.newArrayListWithExpectedSize(${table.variableName}DOs.size());
+        List<${table.className}DO> updateList = Lists.newArrayListWithExpectedSize(${table.variableName}DOs.size());
+        for (${table.className}DO ${table.variableName}DO : ${table.variableName}DOs) {
+            Long oldId = businessKeyToIdMap.get(getBusinessKey(${table.variableName}DO));
+            if (Objects.isNull(oldId)) {
+                insertList.add(${table.variableName}DO);
+            } else {
+                ${table.variableName}DO.setId(oldId);
+                updateList.add(${table.variableName}DO);
+            }
+        }
+        insertBatch${table.className}DOs(userId, insertList);
+        updateBatch${table.className}DOsByPrimaryKey(userId, updateList);
     }
 
     /**
-     * 根据QueryBO中的非空字段动态构建LambdaQueryWrapper查询条件。
-     * 仅对非主键、非审计字段进行条件拼装。
+     * 批量新增${table.comment!table.className}
+     *
+     * @param userId       {@code Long} 用户id
+     * @param ${table.variableName}DOs {@link ${table.className}DO}
      */
-    private LambdaQueryWrapper<${table.className}DO> buildWrapper(${table.className}QueryBO queryBO) {
-        LambdaQueryWrapper<${table.className}DO> wrapper = new LambdaQueryWrapper<>();
-        if (queryBO == null) {
-            return wrapper;
+    @Transactional(rollbackFor = Exception.class)
+    public void insertBatch${table.className}DOs(Long userId, final List<${table.className}DO> ${table.variableName}DOs) {
+        if (CollectionUtils.isEmpty(${table.variableName}DOs)) {
+            return;
         }
-<#list table.columns as column>
-<#if !column.primaryKey && !util.isAuditField(column.javaName)>
-<#if column.javaType == "String">
-        if (StringUtils.hasText(queryBO.get${util.firstUpper(column.javaName)}())) {
-            wrapper.eq(${table.className}DO::get${util.firstUpper(column.javaName)}, queryBO.get${util.firstUpper(column.javaName)}());
+        final MapperBatchAction<${table.className}Mapper> insertBatchAction = MapperBatchAction
+                .create(${table.className}Mapper.class, sqlSessionFactory);
+        for (${table.className}DO ${table.variableName}DO : ${table.variableName}DOs) {
+            ${table.variableName}DO.setCreateBy(userId);
+            ${table.variableName}DO.setUpdateBy(userId);
+            insertBatchAction.addAction(mapper -> mapper.insertSelective(${table.variableName}DO));
         }
-<#elseif column.javaType == "Integer" || column.javaType == "Long" || column.javaType == "Boolean">
-        if (queryBO.get${util.firstUpper(column.javaName)}() != null) {
-            wrapper.eq(${table.className}DO::get${util.firstUpper(column.javaName)}, queryBO.get${util.firstUpper(column.javaName)}());
+        insertBatchAction.doBatchActions();
+    }
+
+    /**
+     * 批量更新${table.comment!table.className}
+     *
+     * @param userId       {@code Long} 用户id
+     * @param ${table.variableName}DOs {@link ${table.className}DO}
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBatch${table.className}DOsByPrimaryKey(Long userId, final List<${table.className}DO> ${table.variableName}DOs) {
+        if (CollectionUtils.isEmpty(${table.variableName}DOs)) {
+            return;
         }
-</#if>
-</#if>
-</#list>
-        return wrapper;
+        final MapperBatchAction<${table.className}Mapper> updateBatchAction = MapperBatchAction
+                .create(${table.className}Mapper.class, sqlSessionFactory);
+        for (${table.className}DO ${table.variableName}DO : ${table.variableName}DOs) {
+            ${table.variableName}DO.setUpdateBy(userId);
+            UpdateQuery<${table.className}DO> updateQuery = UpdateQuery.createQuery(${table.className}DO.class)
+                    .set(${table.variableName}DO, ignore -> ignore.ignore(${table.className}DO::getId,
+                            ${table.className}DO::getCreateTime,
+                            ${table.className}DO::getCreateBy,
+                            ${table.className}DO::getUpdateTime))
+                    .and(${table.className}DO::getId, isEqual(${table.variableName}DO.getId()));
+            updateBatchAction.addAction(mapper -> mapper.updateByUpdateQuery(updateQuery));
+        }
+        updateBatchAction.doBatchActions();
+    }
+
+    /**
+     * 更新${table.comment!table.className}删除状态
+     *
+     * @param userId  用户id
+     * @param ids     id列表
+     * @param deleted 删除状态
+     */
+    public void updateDeletedByIds(Long userId, Collection<Long> ids, Integer deleted) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
+        UpdateQuery<${table.className}DO> updateQuery = UpdateQuery.createQuery(${table.className}DO.class)
+                .set(${table.className}DO::getDeleted, deleted)
+                .set(${table.className}DO::getUpdateBy, userId)
+                .and(${table.className}DO::getId, c -> c.in(ids));
+        ${table.variableName}Mapper.updateByUpdateQuery(updateQuery);
+    }
+
+    /**
+     * 根据id查询${table.comment!table.className}
+     *
+     * @param id 主键id
+     * @return {@link ${table.className}DO}
+     */
+    public Optional<${table.className}DO> get${table.className}DOById(Long id) {
+        return Optional.ofNullable(${table.variableName}Mapper.selectByPrimaryKey(id));
+    }
+
+    /**
+     * 分页查询${table.comment!table.className}
+     *
+     * @param ${table.variableName}QueryBO {@link ${table.className}QueryBO}
+     * @param pageSize    每页大小
+     * @param pageNum     页码
+     * @return {@link NormPagingResult}
+     */
+    public NormPagingResult<${table.className}DO> pageQuery(
+            ${table.className}QueryBO ${table.variableName}QueryBO, Integer pageSize, Integer pageNum,
+            String sortProperty, SortDirection sortDirection) {
+        NormPagingQuery<${table.className}DO> query =
+                NormPagingQuery.createQuery(${table.className}DO.class, pageNum, pageSize, false, true)
+                        .and(Objects.nonNull(${table.variableName}QueryBO.getDeleted()),
+                                ${table.className}DO::getDeleted, isEqual(${table.variableName}QueryBO.getDeleted()));
+        query.addSorts(new SortDescriptor(sortProperty, sortDirection));
+        return ${table.variableName}Mapper.selectByNormalPaging(query);
+    }
+
+    /**
+     * 获取DB中已经存在的${table.comment!table.className}数据
+     *
+     * @return map key:业务key value:id
+     */
+    public Map<String, Long> getBusinessKeyToIdMap(Collection<${table.className}DO> ${table.variableName}DOs) {
+        DynamicQuery<${table.className}DO> dynamicQuery = DynamicQuery.createQuery(${table.className}DO.class)
+                .select(${table.className}DO::getId);
+        for (${table.className}DO ${table.variableName}DO : ${table.variableName}DOs) {
+            dynamicQuery.or(${table.className}DO::getId, isEqual(${table.variableName}DO.getId()));
+        }
+        return ${table.variableName}Mapper.selectByDynamicQuery(dynamicQuery).stream()
+                .collect(Collectors.toMap(this::getBusinessKey, ${table.className}DO::getId, (v1, v2) -> v2));
+    }
+
+    /**
+     * 获取${table.comment!table.className}业务key
+     *
+     * @param ${table.variableName}DO {@link ${table.className}DO}
+     * @return 业务key
+     */
+    public String getBusinessKey(${table.className}DO ${table.variableName}DO) {
+        return String.valueOf(${table.variableName}DO.getId());
     }
 }

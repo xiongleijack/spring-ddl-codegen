@@ -1,37 +1,28 @@
-<#-- ============================================================
-     QueryBO查询业务对象模板
-     生成 {ClassName}QueryBO.java，Service/DAO层内部使用的查询条件对象。
-     与QueryDTO字段一致，用于Service层与DAO层之间传递查询参数，
-     实现API层(DTO)与数据层(BO)的解耦。
-     ============================================================ -->
-package ${basePackage}.domain.bo;
+<#-- QueryBO查询业务对象模板 - 对齐 tmpl.json 风格 -->
+package ${basePackage}.model.bo;
 
-<#if config.stack.lombok>
-import lombok.Data;
-</#if>
 <#list importTypes as importType>
 import ${importType};
 </#list>
+import java.sql.Timestamp;
 
 /**
  * ${table.comment!table.className}表查询业务对象
  *
  * @author ${author}
  */
-<#if config.stack.lombok>
-@Data
-</#if>
 public class ${table.className}QueryBO {
 
 <#list table.columns as column>
-<#if !column.primaryKey && !util.isAuditField(column.javaName)>
+<#if column.comment?? && column.comment != "">
+    /**
+     * ${column.comment}
+     */
+</#if>
     private ${util.simpleType(column.javaType)} ${column.javaName};
 
-</#if>
 </#list>
-<#if !config.stack.lombok>
 <#list table.columns as column>
-<#if !column.primaryKey && !util.isAuditField(column.javaName)>
     public ${util.simpleType(column.javaType)} get${util.firstUpper(column.javaName)}() {
         return ${column.javaName};
     }
@@ -40,7 +31,5 @@ public class ${table.className}QueryBO {
         this.${column.javaName} = ${column.javaName};
     }
 
-</#if>
 </#list>
-</#if>
 }

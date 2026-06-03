@@ -1,24 +1,24 @@
 project:
   basePackage: com.example.order
-  author: codegen
+  author: xionglei
 
 paths:
-  entity: src/main/java/com/example/order/domain/entity
-  mapper: src/main/java/com/example/order/infrastructure/mapper
-  dao: src/main/java/com/example/order/infrastructure/dao
-  service: src/main/java/com/example/order/application/service
-  serviceImpl: src/main/java/com/example/order/application/service/impl
-  controller: src/main/java/com/example/order/api/controller
-  dto: src/main/java/com/example/order/api/dto
-  bo: src/main/java/com/example/order/domain/bo
+  entity: src/main/java/com/example/order/model/entity
+  mapper: src/main/java/com/example/order/mapper
+  dao: src/main/java/com/example/order/dao
+  service: src/main/java/com/example/order/service
+  serviceImpl: src/main/java/com/example/order/service/impl
+  controller: src/main/java/com/example/order/controller/management
+  dto: src/main/java/com/example/order/model/dto
+  bo: src/main/java/com/example/order/model/bo
 
 options:
-  enableImport: true
-  enableExport: true
+  enableImport: false
+  enableExport: false
   businessKey: auto
-  overwrite: false
+  overwrite: true
 
 stack:
   orm: mybatis-plus
-  lombok: true
+  lombok: false
   swagger: true

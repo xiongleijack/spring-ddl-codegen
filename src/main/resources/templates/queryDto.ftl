@@ -1,40 +1,25 @@
-<#-- ============================================================
-     QueryDTO查询请求对象模板
-     生成 {ClassName}QueryDTO.java，用于分页/列表查询的请求参数。
-     排除主键和审计字段，仅保留业务查询条件字段。
-     ============================================================ -->
-package ${basePackage}.api.dto;
+<#-- QueryDTO查询请求对象模板 - 对齐 tmpl.json 风格 -->
+package ${basePackage}.model.dto.request;
 
-<#if config.stack.lombok>
-import lombok.Data;
-</#if>
-<#if config.stack.swagger>
-import io.swagger.v3.oas.annotations.media.Schema;
-</#if>
 <#list importTypes as importType>
 import ${importType};
 </#list>
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * ${table.comment!table.className}表查询请求对象
+ * ${table.comment!table.className}表Query对象 {@link ${table.className}DO}
  *
  * @author ${author}
  */
-<#if config.stack.lombok>
-@Data
-</#if>
 public class ${table.className}QueryDTO {
 
 <#list table.columns as column>
 <#if !column.primaryKey && !util.isAuditField(column.javaName)>
-<#if config.stack.swagger>
-    @Schema(description = "${column.comment!column.name}")
-</#if>
+    @ApiModelProperty("${column.comment!column.name}")
     private ${util.simpleType(column.javaType)} ${column.javaName};
 
 </#if>
 </#list>
-<#if !config.stack.lombok>
 <#list table.columns as column>
 <#if !column.primaryKey && !util.isAuditField(column.javaName)>
     public ${util.simpleType(column.javaType)} get${util.firstUpper(column.javaName)}() {
@@ -47,5 +32,4 @@ public class ${table.className}QueryDTO {
 
 </#if>
 </#list>
-</#if>
 }

@@ -67,10 +67,10 @@ public class CodeGenerator {
         files.add(new GeneratedFile(config.getPaths().getDao(), table.getClassName() + "DAO.java", "dao.ftl", model));
         files.add(new GeneratedFile(config.getPaths().getService(), table.getClassName() + "Service.java", "service.ftl", model));
         files.add(new GeneratedFile(config.getPaths().getServiceImpl(), table.getClassName() + "ServiceImpl.java", "serviceImpl.ftl", model));
-        files.add(new GeneratedFile(config.getPaths().getController(), table.getClassName() + "Controller.java", "controller.ftl", model));
+        files.add(new GeneratedFile(config.getPaths().getController(), "Mgt" + table.getClassName() + "Controller.java", "controller.ftl", model));
         files.add(new GeneratedFile(config.getPaths().getDto(), table.getClassName() + "DetailDTO.java", "detailDto.ftl", model));
-        files.add(new GeneratedFile(config.getPaths().getDto(), table.getClassName() + "QueryDTO.java", "queryDto.ftl", model));
-        files.add(new GeneratedFile(config.getPaths().getDto(), table.getClassName() + "PageDTO.java", "pageDto.ftl", model));
+        files.add(new GeneratedFile(config.getPaths().getDto() + "/request", table.getClassName() + "QueryDTO.java", "queryDto.ftl", model));
+        files.add(new GeneratedFile(config.getPaths().getDto() + "/response", table.getClassName() + "PageDTO.java", "pageDto.ftl", model));
         files.add(new GeneratedFile(config.getPaths().getBo(), table.getClassName() + "QueryBO.java", "queryBo.ftl", model));
 
         if (config.getOptions().isEnableImport()) {
