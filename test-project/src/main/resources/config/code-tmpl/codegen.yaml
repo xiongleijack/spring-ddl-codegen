@@ -1,10 +1,9 @@
 project:
-  basePackage: com.example.order
+  basePackage: com.example.onshore
   author: xionglei
   database: bond_basic
 
 ddl: schema.sql
-output: ../../../../..
 
 templates:
   - do

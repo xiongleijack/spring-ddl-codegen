@@ -30,10 +30,10 @@ public final class TypeMapper {
         TYPE_MAPPING.put("tinytext", "String");
         TYPE_MAPPING.put("mediumtext", "String");
         TYPE_MAPPING.put("longtext", "String");
-        TYPE_MAPPING.put("date", "java.time.LocalDate");
-        TYPE_MAPPING.put("datetime", "java.time.LocalDateTime");
-        TYPE_MAPPING.put("timestamp", "java.time.LocalDateTime");
-        TYPE_MAPPING.put("time", "java.time.LocalTime");
+        TYPE_MAPPING.put("date", "java.sql.Date");
+        TYPE_MAPPING.put("datetime", "java.sql.Timestamp");
+        TYPE_MAPPING.put("timestamp", "java.sql.Timestamp");
+        TYPE_MAPPING.put("time", "java.sql.Time");
         TYPE_MAPPING.put("bit", "Boolean");
         TYPE_MAPPING.put("boolean", "Boolean");
         TYPE_MAPPING.put("bool", "Boolean");

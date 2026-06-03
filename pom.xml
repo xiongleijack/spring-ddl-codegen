@@ -6,7 +6,7 @@
 
     <groupId>com.codegen</groupId>
     <artifactId>spring-ddl-codegen</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>spring-ddl-codegen</name>
     <description>DDL to Spring Boot code generator with FreeMarker templates</description>
 

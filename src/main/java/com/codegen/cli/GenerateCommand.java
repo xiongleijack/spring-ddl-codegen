@@ -18,7 +18,7 @@ import java.util.List;
 @Command(
         name = "spring-ddl-codegen",
         mixinStandardHelpOptions = true,
-        version = "0.1.0",
+        version = "1.0.0",
         description = "Generate Spring Boot code from DDL using FreeMarker templates"
 )
 public class GenerateCommand implements Runnable {
@@ -82,7 +82,7 @@ public class GenerateCommand implements Runnable {
 
     /**
      * 解析项目根目录（代码输出基准目录）。
-     * 优先级：--output 命令行参数 > 配置文件 output 字段（相对于配置文件目录解析）。
+     * 优先级：--output 命令行参数 > 配置文件 output 字段 > 当前工作目录。
      *
      * @param projectConfig 项目配置
      * @return 项目根目录绝对路径
@@ -91,14 +91,11 @@ public class GenerateCommand implements Runnable {
         if (output != null) {
             return output.toAbsolutePath();
         }
-        Path configDir = config.toAbsolutePath().getParent();
         if (projectConfig.getOutput() != null && !projectConfig.getOutput().isEmpty()) {
+            Path configDir = config.toAbsolutePath().getParent();
             return configDir.resolve(projectConfig.getOutput()).normalize();
         }
-        throw new CommandLine.ParameterException(
-                new CommandLine(this),
-                "Output directory not specified. Use --output option or set 'output' in codegen.yaml."
-        );
+        return Paths.get("").toAbsolutePath();
     }
 
     /**
@@ -120,5 +117,29 @@ public class GenerateCommand implements Runnable {
                 new CommandLine(this),
                 "DDL file not specified. Use --ddl option or set 'ddl' in codegen.yaml."
         );
+    }
+
+    /**
+     * 未指定 --config 时，默认读取 jar 包所在目录下的 codegen.yaml。
+     *
+     * @return 默认配置文件路径
+     */
+    private Path resolveDefaultConfig() {
+        try {
+            Path jarPath = Paths.get(
+                    GenerateCommand.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+            );
+            Path jarDir = jarPath.getParent();
+            Path defaultConfig = jarDir.resolve("codegen.yaml");
+            if (!defaultConfig.toFile().exists()) {
+                throw new CommandLine.ParameterException(
+                        new CommandLine(this),
+                        "No --config specified and codegen.yaml not found in jar directory: " + jarDir
+                );
+            }
+            return defaultConfig;
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Failed to resolve jar location", e);
+        }
     }
 }
