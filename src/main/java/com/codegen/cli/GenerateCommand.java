@@ -3,6 +3,7 @@ package com.codegen.cli;
 import com.codegen.config.ConfigLoader;
 import com.codegen.config.ProjectConfig;
 import com.codegen.ddl.DdlParser;
+import com.codegen.ddl.JdbcMetadataReader;
 import com.codegen.generator.CodeGenerator;
 import com.codegen.model.TableDefinition;
 import picocli.CommandLine;
@@ -69,10 +70,19 @@ public class GenerateCommand implements Runnable {
         ProjectConfig projectConfig = ConfigLoader.load(config);
         Path projectRoot = resolveProjectRoot(projectConfig);
 
-        Path ddlPath = resolveDdlPath(projectConfig);
-        List<TableDefinition> tables = DdlParser.parseFile(ddlPath);
+        List<TableDefinition> tables;
+        if (projectConfig.getDatasource() != null
+                && projectConfig.getDatasource().getUrl() != null
+                && !projectConfig.getDatasource().getUrl().isEmpty()) {
+            JdbcMetadataReader reader = new JdbcMetadataReader(projectConfig.getDatasource());
+            tables = reader.readTables();
+        } else {
+            Path ddlPath = resolveDdlPath(projectConfig);
+            tables = DdlParser.parseFile(ddlPath);
+        }
+
         if (tables.isEmpty()) {
-            throw new IllegalArgumentException("No CREATE TABLE statement found in DDL: " + ddlPath);
+            throw new IllegalArgumentException("未找到任何表定义，请检查datasource或ddl配置");
         }
 
         boolean shouldWrite = !dryRun;

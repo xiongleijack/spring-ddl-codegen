@@ -39,6 +39,10 @@ public final class DdlParser {
     private static final Pattern AUTO_INCREMENT = Pattern.compile("AUTO_INCREMENT", Pattern.CASE_INSENSITIVE);
     private static final Pattern NOT_NULL = Pattern.compile("NOT\\s+NULL", Pattern.CASE_INSENSITIVE);
     private static final Pattern COMMENT = Pattern.compile("COMMENT\\s+'((?:''|[^'])*)'", Pattern.CASE_INSENSITIVE);
+    private static final Pattern CONSTRAINT_DEF = Pattern.compile(
+            "^CONSTRAINT\\s+",
+            Pattern.CASE_INSENSITIVE
+    );
     private static final Pattern PRIMARY_KEY_DEF = Pattern.compile(
             "PRIMARY\\s+KEY\\s*\\(([^)]+)\\)",
             Pattern.CASE_INSENSITIVE
@@ -109,7 +113,7 @@ public final class DdlParser {
         List<IndexDefinition> indexes = new ArrayList<>();
 
         for (String part : splitDefinitions(body)) {
-            String trimmed = part.trim();
+            String trimmed = part.trim().replaceAll("\\s+", " ");
             if (trimmed.isEmpty()) {
                 continue;
             }
@@ -141,6 +145,27 @@ public final class DdlParser {
                 index.setName(keyMatcher.group(1));
                 index.setColumns(parseColumnList(keyMatcher.group(2)));
                 indexes.add(index);
+                continue;
+            }
+
+            if (CONSTRAINT_DEF.matcher(trimmed).find()) {
+                Matcher constraintPk = PRIMARY_KEY_DEF.matcher(trimmed);
+                if (constraintPk.find()) {
+                    IndexDefinition index = new IndexDefinition();
+                    index.setName("PRIMARY");
+                    index.setPrimary(true);
+                    index.setUnique(true);
+                    index.setColumns(parseColumnList(constraintPk.group(1)));
+                    indexes.add(index);
+                }
+                Matcher constraintUk = UNIQUE_KEY_DEF.matcher(trimmed);
+                if (constraintUk.find()) {
+                    IndexDefinition index = new IndexDefinition();
+                    index.setName(constraintUk.group(1));
+                    index.setUnique(true);
+                    index.setColumns(parseColumnList(constraintUk.group(2)));
+                    indexes.add(index);
+                }
                 continue;
             }
 
@@ -197,7 +222,24 @@ public final class DdlParser {
         List<String> parts = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         int depth = 0;
-        for (char ch : body.toCharArray()) {
+        boolean inQuote = false;
+        for (int i = 0; i < body.length(); i++) {
+            char ch = body.charAt(i);
+            if (inQuote) {
+                current.append(ch);
+                if (ch == '\'' && i + 1 < body.length() && body.charAt(i + 1) == '\'') {
+                    current.append(body.charAt(i + 1));
+                    i++;
+                } else if (ch == '\'') {
+                    inQuote = false;
+                }
+                continue;
+            }
+            if (ch == '\'') {
+                inQuote = true;
+                current.append(ch);
+                continue;
+            }
             if (ch == '(') {
                 depth++;
             } else if (ch == ')') {

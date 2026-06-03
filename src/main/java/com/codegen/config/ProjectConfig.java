@@ -24,6 +24,8 @@ public class ProjectConfig {
     private String ddl;
     /** 代码输出目录（相对于配置文件所在目录，不配则默认为配置文件上两级目录） */
     private String output;
+    /** JDBC数据源配置（与ddl二选一） */
+    private DatasourceSection datasource;
 
     public ProjectSection getProject() {
         return project;
@@ -71,6 +73,14 @@ public class ProjectConfig {
 
     public void setOutput(String output) {
         this.output = output;
+    }
+
+    public DatasourceSection getDatasource() {
+        return datasource;
+    }
+
+    public void setDatasource(DatasourceSection datasource) {
+        this.datasource = datasource;
     }
 
     /**
@@ -226,6 +236,53 @@ public class ProjectConfig {
 
         public void setSwagger(boolean swagger) {
             this.swagger = swagger;
+        }
+    }
+
+    /**
+     * JDBC数据源配置，与 ddl 字段二选一。
+     * 配置后工具将直接连接数据库读取表元数据，避免 DDL 文本解析的歧义问题。
+     */
+    public static class DatasourceSection {
+        /** JDBC连接URL，例如 jdbc:mysql://localhost:3306/my_db */
+        private String url;
+        /** 数据库用户名 */
+        private String username;
+        /** 数据库密码 */
+        private String password;
+        /** 指定要生成的表名列表，不配则读取schema下所有表 */
+        private List<String> tables;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public List<String> getTables() {
+            return tables;
+        }
+
+        public void setTables(List<String> tables) {
+            this.tables = tables;
         }
     }
 }

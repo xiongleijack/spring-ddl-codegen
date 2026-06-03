@@ -2,7 +2,6 @@
 package ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePackage}</#if>;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 <#list importTypes as importType>
 import ${importType};
 </#list>

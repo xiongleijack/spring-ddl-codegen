@@ -51,7 +51,10 @@ public class TemplateUtils {
      * @return 首字母大写后的字符串
      */
     public String firstUpper(String value) {
-        return NamingUtils.toUpperCamel(value);
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+        return Character.toUpperCase(value.charAt(0)) + value.substring(1);
     }
 
     /**

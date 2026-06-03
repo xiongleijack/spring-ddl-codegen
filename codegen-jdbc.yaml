@@ -1,0 +1,35 @@
+project:
+  basePackage: com.example.order
+  author: xionglei
+  database: bond_basic
+
+# 数据源方式（与 ddl 二选一）：直接连接数据库读取表元数据，无解析歧义
+datasource:
+  url: jdbc:mysql://localhost:3306/bond_basic?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+  username: root
+  password: root123
+  tables:                    # 可选，不配则读取schema下所有表
+    - onshore_bond_filter_v3
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  - serviceImpl
+  - controller
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
+
+options:
+  enableImport: false
+  enableExport: false
+  businessKey: auto
+  overwrite: true
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

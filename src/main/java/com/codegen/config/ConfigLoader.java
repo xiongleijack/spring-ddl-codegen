@@ -31,6 +31,13 @@ public final class ConfigLoader {
         if (isBlank(config.getProject().getBasePackage())) {
             throw new IllegalArgumentException("project.basePackage is required in " + configPath);
         }
+        boolean hasDdl = !isBlank(config.getDdl());
+        boolean hasDatasource = config.getDatasource() != null
+                && !isBlank(config.getDatasource().getUrl());
+        if (!hasDdl && !hasDatasource) {
+            throw new IllegalArgumentException(
+                    "必须配置 'ddl' 或 'datasource.url' 中的至少一个: " + configPath);
+        }
     }
 
     private static boolean isBlank(String value) {
