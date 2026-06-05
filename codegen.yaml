@@ -11,15 +11,13 @@ templates:
   - dao
   - service
   - serviceImpl
-  - controller
+  - mgtController
   - detailDto
   - queryDto
   - pageDto
   - queryBo
 
 options:
-  enableImport: false
-  enableExport: false
   businessKey: auto
   overwrite: true
 

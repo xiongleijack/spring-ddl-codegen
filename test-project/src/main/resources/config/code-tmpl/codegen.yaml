@@ -1,26 +1,36 @@
 project:
-  basePackage: com.example.onshore
+  basePackage: com.excel.order
   author: xionglei
-  database: bond_basic
+  database: dwd_bond
 
-ddl: schema.sql
+# 方式一直接生成ddl语句进行读写
+#ddl: sql/schema.sql
+
+# 方式二数据源的读取方式
+datasource:
+  url: jdbc:mysql://pc-uf6m1w8l4i301u655.rwlb.rds.aliyuncs.com:3306/dev_dwd_bond_excel?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+  username: ops_dev_polar
+  password: syjG77nNu7Edq31nKawt
+  tables:                    # 可选，不配则读取schema下所有表
+    - onshore_bond_filter_v3
 
 templates:
   - do
   - mapper
-  - dao
-  - service
-  - serviceImpl
-  - controller
-  - detailDto
-  - queryDto
-  - pageDto
-  - queryBo
+#  - dao
+#  - service
+#  - serviceImpl
+#  - mgtController
+#  - detailDto
+#  - queryDto
+#  - pageDto
+#  - queryBo
 
 options:
   businessKey: auto
   overwrite: true
 
 stack:
+  orm: mybatis-plus
   lombok: false
   swagger: true

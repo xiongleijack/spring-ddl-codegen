@@ -20,7 +20,6 @@ public class OnshoreBondFilterV3DO {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
-
     /**
      * 债券统一编码
      */
