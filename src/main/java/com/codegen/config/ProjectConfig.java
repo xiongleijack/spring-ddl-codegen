@@ -18,7 +18,7 @@ public class ProjectConfig {
     /** 要生成的模板列表，不配置则全部生成 */
     private List<String> templates = Arrays.asList(
             "do", "mapper", "dao", "service", "serviceImpl",
-            "controller", "detailDto", "queryDto", "pageDto", "queryBo"
+            "mgtController", "detailDto", "queryDto", "pageDto", "queryBo", "canalDto"
     );
     /** DDL文件路径（相对于配置文件所在目录） */
     private String ddl;

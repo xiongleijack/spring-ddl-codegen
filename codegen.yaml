@@ -16,6 +16,7 @@ templates:
   - queryDto
   - pageDto
   - queryBo
+  - canalDTO
 
 options:
   businessKey: auto

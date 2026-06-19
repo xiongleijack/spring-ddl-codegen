@@ -14,12 +14,13 @@ templates:
   - mapper
   - dao
   - service
-  # - serviceImpl
-  # - mgtController
-  # - detailDto
-  # - queryDto
-  # - pageDto
-  # - queryBo
+  - serviceImpl
+  - mgtController
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
+  - canalDTO
 
 options:
   businessKey: auto

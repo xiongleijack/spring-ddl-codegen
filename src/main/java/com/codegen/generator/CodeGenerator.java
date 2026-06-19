@@ -94,7 +94,7 @@ public class CodeGenerator {
         if (enabledTemplates.contains("queryBo")) {
             files.add(new GeneratedFile(config.getResolvedPath("bo"), table.getClassName() + "QueryBO.java", "queryBo.ftl", model));
         }
-        if (enabledTemplates.contains("canalDto")) {
+        if (enabledTemplates.contains("canalDto") || enabledTemplates.contains("canalDTO")) {
             files.add(new GeneratedFile(config.getResolvedPath("dto") + "/canal", table.getClassName() + "CanalDTO.java", "canalDto.ftl", model));
         }
 
