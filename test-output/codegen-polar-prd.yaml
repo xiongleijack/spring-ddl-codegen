@@ -1,0 +1,31 @@
+datasource: polar_prd
+
+project:
+  basePackage: com.example.spider
+  author: xionglei
+  database: spider
+
+tables:
+  - bond_info_csrc_fnd_ann
+  - bond_info_amac_fund
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  # - serviceImpl
+  # - mgtController
+  # - detailDto
+  # - queryDto
+  # - pageDto
+  # - queryBo
+
+options:
+  businessKey: auto
+  overwrite: true
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

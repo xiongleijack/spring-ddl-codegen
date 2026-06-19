@@ -1,0 +1,33 @@
+# 生成层配置示例：codegen-polar-prd.yaml
+# 命名规则：codegen-{实例名}.yaml，实例名中 _ 换 -
+
+datasource: polar_prd
+
+project:
+  basePackage: com.example.spider
+  author: xionglei
+  database: spider
+
+tables:
+  - onshore_bond_filter_v3
+
+templates:
+  - do
+  - mapper
+  - dao
+  - service
+  - serviceImpl
+  - mgtController
+  - detailDto
+  - queryDto
+  - pageDto
+  - queryBo
+
+options:
+  businessKey: auto
+  overwrite: false
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

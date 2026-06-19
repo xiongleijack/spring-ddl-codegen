@@ -24,8 +24,12 @@ public class ProjectConfig {
     private String ddl;
     /** 代码输出目录（相对于配置文件所在目录，不配则默认为配置文件上两级目录） */
     private String output;
-    /** JDBC数据源配置（与ddl二选一） */
+    /** JDBC数据源配置（与ddl二选一），可由 datasource 标识符解析后填充 */
     private DatasourceSection datasource;
+    /** 数据源标识符模式下的表名列表（也可写在 datasource.tables） */
+    private List<String> tables;
+    /** datasources.yaml 路径，默认 ~/.cursor/config/datasources.yaml */
+    private String datasourcesFile;
 
     public ProjectSection getProject() {
         return project;
@@ -81,6 +85,22 @@ public class ProjectConfig {
 
     public void setDatasource(DatasourceSection datasource) {
         this.datasource = datasource;
+    }
+
+    public List<String> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<String> tables) {
+        this.tables = tables;
+    }
+
+    public String getDatasourcesFile() {
+        return datasourcesFile;
+    }
+
+    public void setDatasourcesFile(String datasourcesFile) {
+        this.datasourcesFile = datasourcesFile;
     }
 
     /**
