@@ -1,5 +1,6 @@
 package com.codegen.generator;
 
+import com.codegen.config.GroupDoConfig;
 import com.codegen.config.ProjectConfig;
 import com.codegen.model.ColumnDefinition;
 import com.codegen.model.TableDefinition;
@@ -51,13 +52,14 @@ public class CodeGenerator {
             table.setBusinessKey(BusinessKeyResolver.resolve(table, config.getOptions().getBusinessKey()));
             generateForTable(table);
         }
+        generateGroupDos();
     }
 
     /**
      * 为单张表生成所有代码文件。
      * 核心层: DO -> Mapper -> DAO -> Service -> ServiceImpl -> Controller
      * 数据层: DetailDTO, QueryDTO, PageDTO, QueryBO
-     * 可选层: ImportController, ExportController
+     * 可选层: canalDto；只读场景用 readonlyDao 替代 dao（同名 XxxDAO.java，勿同时开启）
      */
     private void generateForTable(TableDefinition table) {
         Map<String, Object> model = buildModel(table);
@@ -72,6 +74,9 @@ public class CodeGenerator {
         }
         if (enabledTemplates.contains("dao")) {
             files.add(new GeneratedFile(config.getResolvedPath("dao"), table.getClassName() + "DAO.java", "dao.ftl", model));
+        }
+        if (enabledTemplates.contains("readonlyDao")) {
+            files.add(new GeneratedFile(config.getResolvedPath("dao"), table.getClassName() + "DAO.java", "readonlyDao.ftl", model));
         }
         if (enabledTemplates.contains("service")) {
             files.add(new GeneratedFile(config.getResolvedPath("service"), table.getClassName() + "Service.java", "service.ftl", model));
@@ -101,6 +106,99 @@ public class CodeGenerator {
         for (GeneratedFile file : files) {
             writeFile(file);
         }
+    }
+
+    /**
+     * 根据 groupDos 配置生成分组 DO / GroupMapper（与表循环无关）。
+     */
+    private void generateGroupDos() {
+        boolean generateDo = config.getTemplates().contains("groupDo");
+        boolean generateMapper = config.getTemplates().contains("groupMapper");
+        if (!generateDo && !generateMapper) {
+            return;
+        }
+        List<GroupDoConfig> groupDos = config.getGroupDos();
+        if (groupDos == null || groupDos.isEmpty()) {
+            System.out.println("[skip] templates 含 groupDo/groupMapper，但未配置 groupDos");
+            return;
+        }
+        for (GroupDoConfig groupDo : groupDos) {
+            if (groupDo.getClassName() == null || groupDo.getClassName().trim().isEmpty()) {
+                throw new IllegalArgumentException("groupDos.className 不能为空");
+            }
+            if (generateDo) {
+                if (groupDo.getFields() == null || groupDo.getFields().isEmpty()) {
+                    throw new IllegalArgumentException("groupDos.fields 不能为空: " + groupDo.getClassName());
+                }
+                Map<String, Object> model = buildGroupDoModel(groupDo);
+                writeFile(new GeneratedFile(
+                        config.getResolvedPath("groupEntity"),
+                        groupDo.getClassName() + ".java",
+                        "groupDo.ftl",
+                        model
+                ));
+            }
+            if (generateMapper) {
+                if (groupDo.getSourceTable() == null || groupDo.getSourceTable().trim().isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "生成 groupMapper 时必须配置 groupDos.sourceTable: " + groupDo.getClassName());
+                }
+                Map<String, Object> model = buildGroupMapperModel(groupDo);
+                writeFile(new GeneratedFile(
+                        config.getResolvedPath("groupMapper"),
+                        groupDo.resolveMapperClassName() + ".java",
+                        "groupMapper.ftl",
+                        model
+                ));
+            }
+        }
+    }
+
+    private Map<String, Object> buildGroupDoModel(GroupDoConfig groupDo) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("config", config);
+        model.put("groupDo", groupDo);
+        model.put("basePackage", config.getProject().getBasePackage());
+        model.put("author", config.getProject().getAuthor());
+        model.put("databasePackage", config.getDatabasePackage());
+        model.put("util", new TemplateUtils());
+        model.put("importTypes", collectGroupDoImportTypes(groupDo));
+        return model;
+    }
+
+    private Map<String, Object> buildGroupMapperModel(GroupDoConfig groupDo) {
+        Map<String, Object> model = buildGroupDoModel(groupDo);
+        String sourceTable = groupDo.getSourceTable().trim();
+        String sourceDoSimpleName = NamingUtils.toClassName(sourceTable) + "DO";
+        String dbPkg = config.getDatabasePackage();
+        String entityPkg = config.getProject().getBasePackage() + ".model.entity"
+                + (dbPkg == null || dbPkg.isEmpty() ? "" : "." + dbPkg);
+        model.put("sourceDoFullName", entityPkg + "." + sourceDoSimpleName);
+        model.put("sourceDoSimpleName", sourceDoSimpleName);
+        model.put("mapperClassName", groupDo.resolveMapperClassName());
+        return model;
+    }
+
+    private List<String> collectGroupDoImportTypes(GroupDoConfig groupDo) {
+        Set<String> imports = new LinkedHashSet<String>();
+        if (groupDo.getFields() == null) {
+            return new ArrayList<String>(imports);
+        }
+        for (GroupDoConfig.GroupDoField field : groupDo.getFields()) {
+            String javaType = field.getType();
+            if (javaType == null || javaType.trim().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "groupDos.fields.type 不能为空: " + groupDo.getClassName() + "." + field.getName());
+            }
+            if (javaType.contains(".") && !javaType.startsWith("java.lang.")) {
+                imports.add(javaType);
+            } else if ("Date".equals(javaType) || "java.sql.Date".equals(javaType)) {
+                imports.add("java.sql.Date");
+            } else if ("BigDecimal".equals(javaType)) {
+                imports.add("java.math.BigDecimal");
+            }
+        }
+        return new ArrayList<String>(imports);
     }
 
     /**

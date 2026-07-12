@@ -7,7 +7,6 @@ project:
 
 tables:
   - bond_info_csrc_fnd_ann
-  - bond_info_amac_fund
 
 templates:
   - do

@@ -1,5 +1,6 @@
 package com.codegen.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,11 @@ public class ProjectConfig {
             "do", "mapper", "dao", "service", "serviceImpl",
             "mgtController", "detailDto", "queryDto", "pageDto", "queryBo", "canalDto"
     );
+    /**
+     * 分组 DO 定义列表（与表无关，按配置生成）。
+     * templates 包含 groupDo 时生效。
+     */
+    private List<GroupDoConfig> groupDos = new ArrayList<>();
     /** DDL文件路径（相对于配置文件所在目录） */
     private String ddl;
     /** 代码输出目录（相对于配置文件所在目录，不配则默认为配置文件上两级目录） */
@@ -61,6 +67,14 @@ public class ProjectConfig {
 
     public void setTemplates(List<String> templates) {
         this.templates = templates;
+    }
+
+    public List<GroupDoConfig> getGroupDos() {
+        return groupDos;
+    }
+
+    public void setGroupDos(List<GroupDoConfig> groupDos) {
+        this.groupDos = groupDos;
     }
 
     public String getDdl() {
@@ -142,7 +156,7 @@ public class ProjectConfig {
     /**
      * 根据 basePackage 和 database 自动推导各层代码输出路径。
      *
-     * @param layer 层名称: entity/mapper/dao/service/serviceImpl/controller/dto/bo
+     * @param layer 层名称: entity/groupEntity/mapper/dao/service/serviceImpl/controller/dto/bo
      * @return 相对于项目根目录的输出路径
      */
     public String getResolvedPath(String layer) {
@@ -150,7 +164,9 @@ public class ProjectConfig {
         String dbSuffix = getDatabaseSuffix();
         switch (layer) {
             case "entity":      return basePath + "/model/entity" + dbSuffix;
+            case "groupEntity": return basePath + "/model/entity" + dbSuffix + "/group";
             case "mapper":      return basePath + "/mapper" + dbSuffix;
+            case "groupMapper": return basePath + "/mapper" + dbSuffix + "/group";
             case "dao":         return basePath + "/dao" + dbSuffix;
             case "service":     return basePath + "/service";
             case "serviceImpl": return basePath + "/service/impl";

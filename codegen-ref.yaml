@@ -1,7 +1,7 @@
 # 生成层配置示例：codegen-polar-prd.yaml
 # 命名规则：codegen-{实例名}.yaml，实例名中 _ 换 -
 
-datasource: polar_prd
+datasource: polar_data_prd
 
 project:
   basePackage: com.example.spider
@@ -23,6 +23,22 @@ templates:
   - pageDto
   - queryBo
   - canalDTO
+  - groupDo
+  - groupMapper
+
+# onshore_bond_filter_v3 分组示例：按主体聚合余额与数量
+groupDos:
+  - className:  OnshoreBondFilterV3ComUniCodeGroupDO
+    comment: 按主体唯一编码分组
+    sourceTable: onshore_bond_filter_v3
+    fields:
+      - name: comUniCode
+        type: Long
+        comment: 主体唯一编码
+      - name: maxIssueStartDate
+        type: java.sql.Date
+        column: max(issue_start_date)
+        comment: 最早发行日期
 
 options:
   businessKey: auto

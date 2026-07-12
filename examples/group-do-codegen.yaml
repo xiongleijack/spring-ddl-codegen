@@ -1,0 +1,55 @@
+# 分组 DO + GroupMapper 配置示例
+# 对齐 DefaultComLatestDefaultDateGroupDO / DefaultComLatestBondGroupMapper
+
+project:
+  basePackage: com.example.order
+  author: xionglei
+  database: bond_basic
+
+ddl: sql/schema.sql
+
+templates:
+  - groupDo
+  - groupMapper
+
+groupDos:
+  - className: DefaultComLatestDefaultDateGroupDO
+    comment: 违约主体最新违约债券 分组
+    # 源表表名 → 自动转为 DefaultBondInfoDO
+    sourceTable: default_bond_info
+    # Mapper 类名可与 GroupDO 不同（业务项目里就是这样）
+    mapperClassName: DefaultComLatestBondGroupMapper
+    fields:
+      - name: comUniCode
+        type: Long
+        comment: 主体唯一编码
+      - name: defaultDate
+        type: java.sql.Date
+        column: max(default_date)
+        comment: 违约日期
+
+  - className: ComBondOfferingStatsGroupDO
+    comment: 按募集方式统计发行人债券的数量和规模
+    sourceTable: com_bond_offering_stats
+    # 不配 mapperClassName 时，默认 ComBondOfferingStatsGroupMapper
+    fields:
+      - name: publicOffering
+        type: Integer
+        column: public_offering
+        comment: "募集: 1: 公募; 0: 私募"
+      - name: sumBondBalance
+        type: java.math.BigDecimal
+        column: SUM(bond_balance)
+        comment: 债券余额(万元)
+      - name: sumBondIssueCount
+        type: Integer
+        column: SUM(bond_issue_count)
+        comment: 债券发行数量
+
+options:
+  overwrite: true
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

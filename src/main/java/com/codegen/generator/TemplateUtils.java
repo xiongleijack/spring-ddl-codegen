@@ -104,4 +104,20 @@ public class TemplateUtils {
     public boolean isAuditField(String javaName) {
         return AUDIT_FIELDS.contains(javaName);
     }
+
+    /**
+     * 判断类型是否为 java.sql.Date，分组 DO 中需做防御性拷贝。
+     *
+     * @param fullType Java 类型全名或简单名
+     * @return true 表示是 java.sql.Date
+     */
+    public boolean isSqlDate(String fullType) {
+        if (fullType == null) {
+            return false;
+        }
+        if ("java.sql.Date".equals(fullType) || "Date".equals(fullType)) {
+            return true;
+        }
+        return fullType.endsWith(".sql.Date");
+    }
 }
