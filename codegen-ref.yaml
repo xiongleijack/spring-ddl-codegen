@@ -6,10 +6,10 @@ datasource: polar_data_prd
 project:
   basePackage: com.example.spider
   author: xionglei
-  database: spider
+  database: dwd_bond
 
 tables:
-  - onshore_bond_filter_v3
+  - onshore_bond_filter_v5
 
 templates:
   - do
@@ -18,6 +18,7 @@ templates:
   - service
   - serviceImpl
   - mgtController
+  - internalController
   - detailDto
   - queryDto
   - pageDto
@@ -25,12 +26,17 @@ templates:
   - canalDTO
   - groupDo
   - groupMapper
+  - groupDao
 
-# onshore_bond_filter_v3 分组示例：按主体聚合余额与数量
+# onshore_bond_filter_v5 分组示例：按主体取最大发行起始日
 groupDos:
-  - className:  OnshoreBondFilterV3ComUniCodeGroupDO
+  - className: OnshoreBondFilterV5ComUniCodeGroupDO
     comment: 按主体唯一编码分组
-    sourceTable: onshore_bond_filter_v3
+    sourceTable: onshore_bond_filter_v5
+    # 有效数据过滤：只查未删除（deleted=0）；不配则不加该条件
+    validFilter:
+      field: deleted
+      value: 0
     fields:
       - name: comUniCode
         type: Long
@@ -38,11 +44,11 @@ groupDos:
       - name: maxIssueStartDate
         type: java.sql.Date
         column: max(issue_start_date)
-        comment: 最早发行日期
+        comment: 最晚发行起始日
 
 options:
   businessKey: auto
-  overwrite: false
+  overwrite: true
 
 stack:
   orm: mybatis-plus

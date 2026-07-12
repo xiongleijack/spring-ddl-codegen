@@ -11,6 +11,7 @@ ddl: sql/schema.sql
 templates:
   - groupDo
   - groupMapper
+  - groupDao
 
 groupDos:
   - className: DefaultComLatestDefaultDateGroupDO

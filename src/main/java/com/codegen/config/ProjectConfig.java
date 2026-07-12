@@ -168,10 +168,12 @@ public class ProjectConfig {
             case "mapper":      return basePath + "/mapper" + dbSuffix;
             case "groupMapper": return basePath + "/mapper" + dbSuffix + "/group";
             case "dao":         return basePath + "/dao" + dbSuffix;
+            case "groupDao":    return basePath + "/dao" + dbSuffix + "/group";
             case "service":     return basePath + "/service";
             case "serviceImpl": return basePath + "/service/impl";
-            case "controller":  return basePath + "/controller/management";
-            case "dto":         return basePath + "/model/dto";
+            case "controller":         return basePath + "/controller/management";
+            case "internalController": return basePath + "/controller/internal";
+            case "dto":                return basePath + "/model/dto";
             case "bo":          return basePath + "/model/bo";
             default: throw new IllegalArgumentException("Unknown layer: " + layer);
         }

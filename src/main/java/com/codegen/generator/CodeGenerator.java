@@ -87,6 +87,9 @@ public class CodeGenerator {
         if (enabledTemplates.contains("mgtController")) {
             files.add(new GeneratedFile(config.getResolvedPath("controller"), "Mgt" + table.getClassName() + "Controller.java", "mgtController.ftl", model));
         }
+        if (enabledTemplates.contains("internalController")) {
+            files.add(new GeneratedFile(config.getResolvedPath("internalController"), "Internal" + table.getClassName() + "Controller.java", "internalController.ftl", model));
+        }
         if (enabledTemplates.contains("detailDto")) {
             files.add(new GeneratedFile(config.getResolvedPath("dto"), table.getClassName() + "DetailDTO.java", "detailDto.ftl", model));
         }
@@ -109,17 +112,18 @@ public class CodeGenerator {
     }
 
     /**
-     * 根据 groupDos 配置生成分组 DO / GroupMapper（与表循环无关）。
+     * 根据 groupDos 配置生成分组 DO / GroupMapper / GroupDAO（与表循环无关）。
      */
     private void generateGroupDos() {
         boolean generateDo = config.getTemplates().contains("groupDo");
         boolean generateMapper = config.getTemplates().contains("groupMapper");
-        if (!generateDo && !generateMapper) {
+        boolean generateDao = config.getTemplates().contains("groupDao");
+        if (!generateDo && !generateMapper && !generateDao) {
             return;
         }
         List<GroupDoConfig> groupDos = config.getGroupDos();
         if (groupDos == null || groupDos.isEmpty()) {
-            System.out.println("[skip] templates 含 groupDo/groupMapper，但未配置 groupDos");
+            System.out.println("[skip] templates 含 groupDo/groupMapper/groupDao，但未配置 groupDos");
             return;
         }
         for (GroupDoConfig groupDo : groupDos) {
@@ -139,10 +143,7 @@ public class CodeGenerator {
                 ));
             }
             if (generateMapper) {
-                if (groupDo.getSourceTable() == null || groupDo.getSourceTable().trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "生成 groupMapper 时必须配置 groupDos.sourceTable: " + groupDo.getClassName());
-                }
+                requireSourceTable(groupDo, "groupMapper");
                 Map<String, Object> model = buildGroupMapperModel(groupDo);
                 writeFile(new GeneratedFile(
                         config.getResolvedPath("groupMapper"),
@@ -151,6 +152,32 @@ public class CodeGenerator {
                         model
                 ));
             }
+            if (generateDao) {
+                requireSourceTable(groupDo, "groupDao");
+                if (groupDo.resolveGroupKeys().isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "生成 groupDao 时至少需要一个分组键字段（无聚合表达式的字段）: "
+                                    + groupDo.getClassName());
+                }
+                if (groupDo.resolveMatchFields().isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "生成 groupDao 时至少需要一个可映射到源表的字段: " + groupDo.getClassName());
+                }
+                Map<String, Object> model = buildGroupDaoModel(groupDo);
+                writeFile(new GeneratedFile(
+                        config.getResolvedPath("groupDao"),
+                        groupDo.resolveDaoClassName() + ".java",
+                        "groupDao.ftl",
+                        model
+                ));
+            }
+        }
+    }
+
+    private void requireSourceTable(GroupDoConfig groupDo, String templateName) {
+        if (groupDo.getSourceTable() == null || groupDo.getSourceTable().trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "生成 " + templateName + " 时必须配置 groupDos.sourceTable: " + groupDo.getClassName());
         }
     }
 
@@ -168,6 +195,36 @@ public class CodeGenerator {
 
     private Map<String, Object> buildGroupMapperModel(GroupDoConfig groupDo) {
         Map<String, Object> model = buildGroupDoModel(groupDo);
+        putSourceDoNames(model, groupDo);
+        model.put("mapperClassName", groupDo.resolveMapperClassName());
+        return model;
+    }
+
+    private Map<String, Object> buildGroupDaoModel(GroupDoConfig groupDo) {
+        Map<String, Object> model = buildGroupMapperModel(groupDo);
+        TemplateUtils util = new TemplateUtils();
+        String mapperClassName = groupDo.resolveMapperClassName();
+        String sourceDoSimpleName = (String) model.get("sourceDoSimpleName");
+        String sourceMapperClassName = sourceDoSimpleName.substring(0, sourceDoSimpleName.length() - 2) + "Mapper";
+        List<GroupDoConfig.GroupDoField> groupKeys = groupDo.resolveGroupKeys();
+
+        model.put("daoClassName", groupDo.resolveDaoClassName());
+        model.put("mapperVarName", util.firstLower(mapperClassName));
+        model.put("sourceMapperClassName", sourceMapperClassName);
+        model.put("sourceMapperVarName", util.firstLower(sourceMapperClassName));
+        model.put("groupKeys", groupKeys);
+        model.put("primaryGroupKey", groupKeys.get(0));
+        model.put("matchFields", groupDo.resolveMatchFields());
+
+        GroupDoConfig.ValidFilter validFilter = groupDo.getValidFilter();
+        boolean hasValidFilter = validFilter != null && validFilter.isConfigured();
+        model.put("hasValidFilter", hasValidFilter);
+        model.put("validFilter", validFilter);
+        model.put("validFilterLiteral", hasValidFilter ? validFilter.toJavaLiteral() : null);
+        return model;
+    }
+
+    private void putSourceDoNames(Map<String, Object> model, GroupDoConfig groupDo) {
         String sourceTable = groupDo.getSourceTable().trim();
         String sourceDoSimpleName = NamingUtils.toClassName(sourceTable) + "DO";
         String dbPkg = config.getDatabasePackage();
@@ -175,8 +232,6 @@ public class CodeGenerator {
                 + (dbPkg == null || dbPkg.isEmpty() ? "" : "." + dbPkg);
         model.put("sourceDoFullName", entityPkg + "." + sourceDoSimpleName);
         model.put("sourceDoSimpleName", sourceDoSimpleName);
-        model.put("mapperClassName", groupDo.resolveMapperClassName());
-        return model;
     }
 
     private List<String> collectGroupDoImportTypes(GroupDoConfig groupDo) {

@@ -1,9 +1,8 @@
-<#-- Controller控制器模板 - 对齐 RestResponse 风格 -->
-package ${basePackage}.controller.management;
+<#-- Controller控制器模板 - Internal 内部接口，接口与 mgt 相同，但不包装 RestResponse -->
+package ${basePackage}.controller.internal;
 
 import com.github.wz2cool.dynamic.SortDirection;
 import com.github.wz2cool.dynamic.model.NormPagingResult;
-import com.innodealing.commons.http.RestResponse;
 import ${basePackage}.model.dto.${table.className}DetailDTO;
 import ${basePackage}.model.dto.request.${table.className}QueryDTO;
 import ${basePackage}.model.dto.response.${table.className}PageDTO;
@@ -17,61 +16,58 @@ import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
- * management ${table.comment!table.className}后台管理
+ * internal ${table.comment!table.className}内部接口
  *
  * @author ${author}
  */
-@Api(tags = "(后台管理)${table.comment!table.className}")
+@Api(tags = "(内部)${table.comment!table.className}")
 @RestController
-@RequestMapping("/management/${table.variableName}")
-public class Mgt${table.className}Controller {
+@RequestMapping("/internal/${table.variableName}")
+public class Internal${table.className}Controller {
 
     @Resource
     private ${table.className}Service ${table.variableName}Service;
 
     @ApiOperation("新增")
     @PostMapping
-    public RestResponse<Void> insert${table.className}(
+    public void insert${table.className}(
             @ApiParam(value = "用户id") @CookieValue(value = "m_user_id", defaultValue = "1") Long userId,
             @RequestBody ${table.className}DetailDTO ${table.variableName}DetailDTO) {
         ${table.variableName}Service.insert${table.className}(userId, ${table.variableName}DetailDTO);
-        return RestResponse.Success(null);
     }
 
     @ApiOperation("更新删除状态")
     @PutMapping("/deleted")
-    public RestResponse<Void> updateDeletedByIds(
+    public void updateDeletedByIds(
             @ApiParam(value = "用户id") @CookieValue(value = "m_user_id", defaultValue = "1") Long userId,
             @RequestBody Collection<Long> ids,
             @RequestParam @ApiParam(value = "是否有效: 0:有效 1:无效") Integer deleted) {
         ${table.variableName}Service.updateDeletedByIds(userId, ids, deleted);
-        return RestResponse.Success(null);
     }
 
     @ApiOperation("更新")
     @PutMapping
-    public RestResponse<Void> update${table.className}(
+    public void update${table.className}(
             @ApiParam(value = "用户id") @CookieValue(value = "m_user_id", defaultValue = "1") Long userId,
             @RequestBody ${table.className}DetailDTO ${table.variableName}DetailDTO) {
         ${table.variableName}Service.update${table.className}(userId, ${table.variableName}DetailDTO);
-        return RestResponse.Success(null);
     }
 
     @ApiOperation("根据ID查询")
     @GetMapping
-    public RestResponse<${table.className}DetailDTO> get${table.className}ById(@RequestParam Long id) {
-        return RestResponse.Success(${table.variableName}Service.get${table.className}ById(id));
+    public ${table.className}DetailDTO get${table.className}ById(@RequestParam Long id) {
+        return ${table.variableName}Service.get${table.className}ById(id);
     }
 
     @ApiOperation("分页查询")
     @PostMapping("/page")
-    public RestResponse<NormPagingResult<${table.className}PageDTO>> pageQuery(
+    public NormPagingResult<${table.className}PageDTO> pageQuery(
             @RequestBody ${table.className}QueryDTO ${table.variableName}QueryDTO,
             @ApiParam(value = "页码") @RequestParam(defaultValue = "1") Integer pageNum,
             @ApiParam(value = "每页条数") @RequestParam(defaultValue = "50") Integer pageSize,
             @ApiParam(value = "排序字段") @RequestParam(defaultValue = "updateTime") String sortProperty,
             @ApiParam(value = "分页方向") @RequestParam(defaultValue = "DESC") SortDirection sortDirection) {
-        return RestResponse.Success(${table.variableName}Service.pageQuery(
-                ${table.variableName}QueryDTO, pageSize, pageNum, sortProperty, sortDirection));
+        return ${table.variableName}Service.pageQuery(
+                ${table.variableName}QueryDTO, pageSize, pageNum, sortProperty, sortDirection);
     }
 }
