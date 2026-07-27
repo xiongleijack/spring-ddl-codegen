@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn package *)",
+      "Read(//d/tools/**)",
+      "Bash(cp d:/my-code/github/spring-ddl-codegen/target/spring-ddl-codegen-1.0.0.jar d:/tools/spring-ddl-codegen.jar)",
+      "Read(//c/Users/xiong/.claude/skills/**)",
+      "Read(//d/AppData/.claude/skills/**)",
+      "Edit(~/.claude/skills/spring-ddl-codegen/**)",
+      "Bash(find /c/Users/xiong -path \"*/spring-ddl-codegen*\" -name \"*.md\" 2>/dev/null | head -20)",
+      "Read(//c/Users/xiong/**)",
+      "Read(//c/Users/xiong/.cursor/skills/spring-ddl-codegen/**)",
+      "Read(//c/Users/xiong/.codex/skills/spring-ddl-codegen/**)",
+      "Read(//c/Users/xiong/.agents/skills/spring-ddl-codegen/**)",
+      "Bash(head -20 /c/Users/xiong/.codex/skills/spring-ddl-codegen/SKILL.md)",
+      "Bash(head -20 /c/Users/xiong/.agents/skills/spring-ddl-codegen/SKILL.md)",
+      "Bash(cp /c/Users/xiong/.claude/skills/spring-ddl-codegen/SKILL.md /c/Users/xiong/.cursor/skills/spring-ddl-codegen/SKILL.md)",
+      "Bash(cp /c/Users/xiong/.claude/skills/spring-ddl-codegen/SKILL.md /c/Users/xiong/.codex/skills/spring-ddl-codegen/SKILL.md)",
+      "Bash(cp /c/Users/xiong/.claude/skills/spring-ddl-codegen/SKILL.md /c/Users/xiong/.agents/skills/spring-ddl-codegen/SKILL.md)"
+    ],
+    "additionalDirectories": [
+      "d:\\tools",
+      "C:\\Users\\xiong\\.claude\\skills\\spring-ddl-codegen"
+    ]
+  }
+}

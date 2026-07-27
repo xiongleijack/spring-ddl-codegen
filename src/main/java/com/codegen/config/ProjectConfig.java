@@ -203,6 +203,18 @@ public class ProjectConfig {
         private String businessKey = "auto";
         /** 文件已存在时是否覆盖 */
         private boolean overwrite = false;
+        /**
+         * spiderAnnouncementDO/CanalDTO 实现的接口 FQCN。
+         * 默认对齐 sentiment-data-center。
+         */
+        private String spiderAnnouncementEntityClass =
+                "com.innodealing.sentimentdatacenter.model.entity.spider.SpiderAnnouncementEntity";
+        /**
+         * spiderAnnouncementDAO 实现的接口 FQCN。
+         * 默认对齐 sentiment-data-center。
+         */
+        private String spiderAnnouncementSyncClass =
+                "com.innodealing.sentimentdatacenter.dao.spider.SpiderAnnouncementLongPrimaryEntitySync";
 
         public String getBusinessKey() {
             return businessKey;
@@ -218,6 +230,22 @@ public class ProjectConfig {
 
         public void setOverwrite(boolean overwrite) {
             this.overwrite = overwrite;
+        }
+
+        public String getSpiderAnnouncementEntityClass() {
+            return spiderAnnouncementEntityClass;
+        }
+
+        public void setSpiderAnnouncementEntityClass(String spiderAnnouncementEntityClass) {
+            this.spiderAnnouncementEntityClass = spiderAnnouncementEntityClass;
+        }
+
+        public String getSpiderAnnouncementSyncClass() {
+            return spiderAnnouncementSyncClass;
+        }
+
+        public void setSpiderAnnouncementSyncClass(String spiderAnnouncementSyncClass) {
+            this.spiderAnnouncementSyncClass = spiderAnnouncementSyncClass;
         }
     }
 

@@ -1,0 +1,23 @@
+# 公告爬虫表示例：配置名 spiderAnnouncement*，输出类名仍为 XxxDO / XxxCanalDTO / XxxDAO
+project:
+  basePackage: com.innodealing.sentimentdatacenter
+  author: xionglei
+  database: spider
+
+templates:
+  - spiderAnnouncementDO
+  - spiderAnnouncementCanalDTO
+  - spiderAnnouncementDAO
+  - mapper
+
+options:
+  businessKey: auto
+  overwrite: true
+  # 默认即下列 FQCN；换项目时再改
+  # spiderAnnouncementEntityClass: com.innodealing.sentimentdatacenter.model.entity.spider.SpiderAnnouncementEntity
+  # spiderAnnouncementSyncClass: com.innodealing.sentimentdatacenter.dao.spider.SpiderAnnouncementLongPrimaryEntitySync
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

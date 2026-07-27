@@ -7,10 +7,14 @@ import ${basePackage}.model.entity<#if databasePackage?has_content>.${databasePa
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import org.apache.ibatis.session.RowBounds;
+
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static com.github.wz2cool.dynamic.builder.direction.SortDirections.asc;
 
 /**
  * ${table.comment!table.className}表只读数据访问层 {@link ${table.className}DO}
@@ -37,5 +41,19 @@ public class ${table.className}DAO {
         DynamicQuery<${table.className}DO> dynamicQuery = DynamicQuery.createQuery(${table.className}DO.class)
                 .and(${table.className}DO::getId, c -> c.in(ids));
         return ${table.variableName}Mapper.selectByDynamicQuery(dynamicQuery);
+    }
+
+    /**
+     * 分批获取${table.comment!table.className}数据
+     *
+     * @param startId    起始 id（不包含）
+     * @param fetchCount 每批获取数量
+     * @return {@link ${table.className}DO} 集合
+     */
+    public List<${table.className}DO> listByBatch(Long startId, int fetchCount) {
+        DynamicQuery<${table.className}DO> query = DynamicQuery.createQuery(${table.className}DO.class)
+                .and(${table.className}DO::getId, p -> p.greaterThan(startId))
+                .orderBy(${table.className}DO::getId, asc());
+        return ${table.variableName}Mapper.selectRowBoundsByDynamicQuery(query, new RowBounds(0, fetchCount));
     }
 }

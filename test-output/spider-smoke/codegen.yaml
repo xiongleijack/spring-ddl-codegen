@@ -1,0 +1,22 @@
+project:
+  basePackage: com.innodealing.sentimentdatacenter
+  author: xionglei
+  database: spider
+
+ddl: ddl.sql
+output: generated
+
+templates:
+  - spiderAnnouncementDO
+  - spiderAnnouncementCanalDTO
+  - spiderAnnouncementDAO
+  - mapper
+
+options:
+  businessKey: auto
+  overwrite: true
+
+stack:
+  orm: mybatis-plus
+  lombok: false
+  swagger: true

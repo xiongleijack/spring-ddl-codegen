@@ -169,19 +169,47 @@ java -jar target/spring-ddl-codegen-0.1.0-SNAPSHOT.jar --help
 | `XxxImportController.java` | `enableImport: true` |
 | `XxxExportController.java` | `enableExport: true` |
 
+## 公告爬虫模板（sentiment-data-center）
+
+配置名与输出类名分离：yaml 用 `spiderAnnouncement*`，生成文件仍叫 `XxxDO` / `XxxCanalDTO` / `XxxDAO`。
+
+```yaml
+templates:
+  - spiderAnnouncementDO
+  - spiderAnnouncementCanalDTO
+  - spiderAnnouncementDAO
+  - mapper
+
+options:
+  overwrite: true
+  # 可选，默认已对齐 sentiment-data-center
+  # spiderAnnouncementEntityClass: com.innodealing.sentimentdatacenter.model.entity.spider.SpiderAnnouncementEntity
+  # spiderAnnouncementSyncClass: com.innodealing.sentimentdatacenter.dao.spider.SpiderAnnouncementLongPrimaryEntitySync
+```
+
+| yaml 配置名 | 输出文件 | 行为 |
+|-------------|----------|------|
+| `spiderAnnouncementDO` | `XxxDO.java` | `implements SpiderAnnouncementEntity`；同名列委托契约，否则 `return null` |
+| `spiderAnnouncementCanalDTO` | `XxxCanalDTO.java` | 同上 + `@JsonProperty` |
+| `spiderAnnouncementDAO` | `XxxDAO.java` | `implements SpiderAnnouncementLongPrimaryEntitySync` + `listByIds` |
+| `mapper` | `XxxMapper.java` | 与普通表相同 |
+
+**不要**与 `do` / `canalDTO` / `dao` 同时开启（会写同名文件）。标题/时间等业务映射仍需按 mapping 手工或 Agent override。
+
 ## 自定义模板
 
 模板位于：
 
 ```text
 src/main/resources/templates/
-├── entity.ftl
+├── do.ftl
+├── dao.ftl
 ├── mapper.ftl
-├── service.ftl
-├── serviceImpl.ftl
-├── controller.ftl
-├── importController.ftl
-└── exportController.ftl
+├── canalDto.ftl
+├── spiderAnnouncementDo.ftl
+├── spiderAnnouncementCanalDto.ftl
+├── spiderAnnouncementDao.ftl
+└── ...
 ```
 
 修改模板后重新 `mvn package` 即可。模板引擎为 [FreeMarker](https://freemarker.apache.org/)，可用变量包括：

@@ -60,20 +60,30 @@ public class CodeGenerator {
      * 核心层: DO -> Mapper -> DAO -> Service -> ServiceImpl -> Controller
      * 数据层: DetailDTO, QueryDTO, PageDTO, QueryBO
      * 可选层: canalDto；只读场景用 readonlyDao 替代 dao（同名 XxxDAO.java，勿同时开启）
+     * 公告爬虫: spiderAnnouncementDO / CanalDTO / DAO（输出类名仍为 XxxDO / XxxCanalDTO / XxxDAO）
      */
     private void generateForTable(TableDefinition table) {
-        Map<String, Object> model = buildModel(table);
         List<String> enabledTemplates = config.getTemplates();
+        validateMutuallyExclusiveTemplates(enabledTemplates);
+        Map<String, Object> model = buildModel(table);
         List<GeneratedFile> files = new ArrayList<>();
 
         if (enabledTemplates.contains("do")) {
             files.add(new GeneratedFile(config.getResolvedPath("entity"), table.getClassName() + "DO.java", "do.ftl", model));
+        }
+        if (enabledTemplates.contains("spiderAnnouncementDO")) {
+            files.add(new GeneratedFile(config.getResolvedPath("entity"), table.getClassName() + "DO.java",
+                    "spiderAnnouncementDo.ftl", model));
         }
         if (enabledTemplates.contains("mapper")) {
             files.add(new GeneratedFile(config.getResolvedPath("mapper"), table.getClassName() + "Mapper.java", "mapper.ftl", model));
         }
         if (enabledTemplates.contains("dao")) {
             files.add(new GeneratedFile(config.getResolvedPath("dao"), table.getClassName() + "DAO.java", "dao.ftl", model));
+        }
+        if (enabledTemplates.contains("spiderAnnouncementDAO")) {
+            files.add(new GeneratedFile(config.getResolvedPath("dao"), table.getClassName() + "DAO.java",
+                    "spiderAnnouncementDao.ftl", model));
         }
         if (enabledTemplates.contains("readonlyDao")) {
             files.add(new GeneratedFile(config.getResolvedPath("dao"), table.getClassName() + "DAO.java", "readonlyDao.ftl", model));
@@ -105,9 +115,48 @@ public class CodeGenerator {
         if (enabledTemplates.contains("canalDto") || enabledTemplates.contains("canalDTO")) {
             files.add(new GeneratedFile(config.getResolvedPath("dto") + "/canal", table.getClassName() + "CanalDTO.java", "canalDto.ftl", model));
         }
+        if (enabledTemplates.contains("spiderAnnouncementCanalDTO")
+                || enabledTemplates.contains("spiderAnnouncementCanalDto")) {
+            files.add(new GeneratedFile(config.getResolvedPath("dto") + "/canal", table.getClassName() + "CanalDTO.java",
+                    "spiderAnnouncementCanalDto.ftl", model));
+        }
 
         for (GeneratedFile file : files) {
             writeFile(file);
+        }
+    }
+
+    /**
+     * 普通 do/canalDTO/dao 与 spiderAnnouncement* 输出同名文件，禁止同时开启。
+     */
+    private void validateMutuallyExclusiveTemplates(List<String> enabledTemplates) {
+        if (enabledTemplates == null || enabledTemplates.isEmpty()) {
+            return;
+        }
+        Set<String> enabled = new LinkedHashSet<String>(enabledTemplates);
+        rejectBoth(enabled, "do", "spiderAnnouncementDO");
+        rejectBoth(enabled, "dao", "spiderAnnouncementDAO");
+        boolean canal = enabled.contains("canalDto") || enabled.contains("canalDTO");
+        boolean spiderCanal = enabled.contains("spiderAnnouncementCanalDTO")
+                || enabled.contains("spiderAnnouncementCanalDto");
+        if (canal && spiderCanal) {
+            throw new IllegalArgumentException(
+                    "templates 不能同时包含 canalDTO 与 spiderAnnouncementCanalDTO（输出同为 XxxCanalDTO.java）");
+        }
+        if (enabled.contains("dao") && enabled.contains("readonlyDao")) {
+            throw new IllegalArgumentException(
+                    "templates 不能同时包含 dao 与 readonlyDao（输出同为 XxxDAO.java）");
+        }
+        if (enabled.contains("spiderAnnouncementDAO") && enabled.contains("readonlyDao")) {
+            throw new IllegalArgumentException(
+                    "templates 不能同时包含 spiderAnnouncementDAO 与 readonlyDao（输出同为 XxxDAO.java）");
+        }
+    }
+
+    private void rejectBoth(Set<String> enabled, String a, String b) {
+        if (enabled.contains(a) && enabled.contains(b)) {
+            throw new IllegalArgumentException(
+                    "templates 不能同时包含 " + a + " 与 " + b + "（输出同名文件）");
         }
     }
 
@@ -275,7 +324,30 @@ public class CodeGenerator {
         model.put("databasePackage", config.getDatabasePackage());
         model.put("util", new TemplateUtils());
         model.put("importTypes", collectImportTypes(table));
+        if (needsSpiderAnnouncementExtras(config.getTemplates())) {
+            Map<String, Object> extras = SpiderAnnouncementContractBuilder.buildExtras(table);
+            model.putAll(extras);
+            ProjectConfig.OptionsSection options = config.getOptions();
+            model.put("spiderAnnouncementEntityClass", options.getSpiderAnnouncementEntityClass());
+            model.put("spiderAnnouncementSyncClass", options.getSpiderAnnouncementSyncClass());
+            // 避免 java.sql.Timestamp 重复 import（列类型已在 importTypes 中）
+            List<String> importTypes = (List<String>) model.get("importTypes");
+            if (Boolean.TRUE.equals(extras.get("spiderNeedsTimestampImport"))
+                    && importTypes.contains("java.sql.Timestamp")) {
+                model.put("spiderNeedsTimestampImport", Boolean.FALSE);
+            }
+        }
         return model;
+    }
+
+    private boolean needsSpiderAnnouncementExtras(List<String> enabledTemplates) {
+        if (enabledTemplates == null) {
+            return false;
+        }
+        return enabledTemplates.contains("spiderAnnouncementDO")
+                || enabledTemplates.contains("spiderAnnouncementCanalDTO")
+                || enabledTemplates.contains("spiderAnnouncementCanalDto")
+                || enabledTemplates.contains("spiderAnnouncementDAO");
     }
 
     /**
